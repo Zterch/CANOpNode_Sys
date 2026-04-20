@@ -1,0 +1,760 @@
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:17]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:18]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:19]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 18, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:20]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:21]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:22]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:23]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [main.c:215] Pos= 2680 Angle=235.55° | Reads: 17, Errors: 0, Success: 100.0%
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:24]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:285] TX: 01 03 00 00 00 01 84 0A
+[2026-04-20 17:55:25]INFO [SYS] [main.c:414] Demo time (10 seconds) completed
+[2026-04-20 17:55:25]INFO [SYS] [main.c:283] Shutting down system...
+[2026-04-20 17:55:25]INFO [ENCODER] [main.c:224] Encoder print thread stopped
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:306] RX len=7: 01 03 02 0A 78 BC F6
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:353] CRC check: data=0x0103020A78, rx_crc=0xF6BC, calc_crc=0xC6BE
+[2026-04-20 17:55:25]INFO [ENCODER] [main.c:177] Encoder data thread stopped
+[2026-04-20 17:55:25]INFO [SYS] [thread_manager.c:160] Thread 'EncoderData' stopped
+[2026-04-20 17:55:25]INFO [POWER] [power_driver.c:22] Power driver deinitialized
+[2026-04-20 17:55:25]INFO [ENCODER] [encoder_driver.c:245] Encoder driver deinitialized
+[2026-04-20 17:55:25]INFO [PRESSURE] [pressure_driver.c:20] Pressure driver deinitialized
+[2026-04-20 17:55:25]INFO [SYS] [thread_manager.c:63] Thread manager deinitialized
+[2026-04-20 17:55:25]INFO [SYS] [main.c:301] System shutdown completed

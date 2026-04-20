@@ -28,6 +28,7 @@
 #include "drivers/power_driver.h"
 #include "drivers/encoder_driver.h"
 #include "drivers/pressure_driver.h"
+#include "drivers/rs485_bus.h"
 #include "algorithms/sine_wave.h"
 
 /******************************************************************************
@@ -48,6 +49,15 @@ static ThreadManager_t g_thread_mgr = {0};
 /* 正弦波生成器 */
 static SineWaveGenerator_t g_sine_gen = {0};
 
+/* 编码器全局数据（用于线程间共享） */
+static int32_t g_encoder_position = 0;
+static int32_t g_encoder_velocity = 0;
+static pthread_mutex_t g_encoder_data_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+/* 压力传感器全局数据 */
+static float g_pressure_value = 0.0f;
+static pthread_mutex_t g_pressure_data_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 /******************************************************************************
  * 信号处理
  ******************************************************************************/
@@ -58,7 +68,7 @@ void signal_handler(int sig) {
 }
 
 /******************************************************************************
- * 控制线程 - 核心控制循环
+ * 控制线程 - 核心控制循环 (仅电机控制)
  ******************************************************************************/
 void* control_thread(void* arg) {
     ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
@@ -117,32 +127,42 @@ void* control_thread(void* arg) {
 }
 
 /******************************************************************************
- * 数据采集线程
+ * 编码器数据采集线程 - 50Hz读取
  ******************************************************************************/
-void* data_thread(void* arg) {
+void* encoder_data_thread(void* arg) {
     ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
     struct timespec ts_start, ts_end;
     double cycle_time_ms;
-    int32_t velocity, position;
+    int32_t position, velocity;
+    int read_ok;
     
-    LOG_INFO(LOG_MODULE_SYS, "Data acquisition thread started");
+    LOG_INFO(LOG_MODULE_ENCODER, "Encoder data thread started (50Hz)");
     
     ctrl->state = THREAD_STATE_RUNNING;
     
     while (!thread_should_exit(ctrl) && g_running) {
         clock_gettime(CLOCK_MONOTONIC, &ts_start);
         
-        /* 读取电机数据 */
-        if (motor_get_velocity(&g_motor, &velocity) == ERR_OK &&
-            motor_get_position(&g_motor, &position) == ERR_OK) {
-            /* 数据可用于后续处理 */
+        read_ok = 0;
+        
+        /* 读取编码器位置 (非阻塞，带超时) */
+        if (encoder_read_position(&g_encoder, &position) == ERR_OK) {
+            /* 读取成功，获取速度 */
+            encoder_read_velocity(&g_encoder, &velocity);
+            
+            /* 更新全局数据 */
+            pthread_mutex_lock(&g_encoder_data_mutex);
+            g_encoder_position = position;
+            g_encoder_velocity = velocity;
+            pthread_mutex_unlock(&g_encoder_data_mutex);
+            
+            g_encoder.read_count++;
+            read_ok = 1;
+        } else {
+            /* 读取失败，增加错误计数 */
+            g_encoder.error_count++;
+            /* 但不阻塞，继续下一次读取 */
         }
-        
-        /* TODO: 读取编码器数据（待实现） */
-        /* encoder_read_position(&g_encoder, &encoder_pos); */
-        
-        /* TODO: 读取压力计数据（待实现） */
-        /* pressure_read(&g_pressure, &pressure_val); */
         
         /* 计算周期时间 */
         clock_gettime(CLOCK_MONOTONIC, &ts_end);
@@ -151,44 +171,137 @@ void* data_thread(void* arg) {
         
         thread_update_stats(ctrl, cycle_time_ms);
         
-        usleep(SYS_DATA_RECORD_PERIOD_MS * 1000);
+        /* 50Hz = 20ms周期 */
+        int sleep_us = ENCODER_READ_PERIOD_MS * 1000 - (int)(cycle_time_ms * 1000);
+        if (sleep_us > 0) {
+            usleep(sleep_us);
+        }
     }
     
     ctrl->state = THREAD_STATE_STOPPED;
-    LOG_INFO(LOG_MODULE_SYS, "Data acquisition thread stopped");
+    LOG_INFO(LOG_MODULE_ENCODER, "Encoder data thread stopped");
     
     return NULL;
 }
 
 /******************************************************************************
- * 日志线程
+ * 编码器打印线程 - 2Hz打印
  ******************************************************************************/
-void* log_thread(void* arg) {
+void* encoder_print_thread(void* arg) {
     ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
-    int32_t velocity, position;
+    int32_t position, velocity;
+    uint32_t last_read_count = 0;
+    uint32_t last_error_count = 0;
     
-    LOG_INFO(LOG_MODULE_SYS, "Log thread started");
+    LOG_INFO(LOG_MODULE_ENCODER, "Encoder print thread started (2Hz)");
     
     ctrl->state = THREAD_STATE_RUNNING;
     
     while (!thread_should_exit(ctrl) && g_running) {
-        /* 读取电机状态 */
-        if (motor_get_velocity(&g_motor, &velocity) == ERR_OK &&
-            motor_get_position(&g_motor, &position) == ERR_OK) {
-            
-            LOG_INFO(LOG_MODULE_MOTOR, "Vel=%6d Pos=%10d State=%s",
-                     velocity, position, 
-                     motor_get_state_string(g_motor.state));
-        }
+        /* 获取编码器数据 */
+        pthread_mutex_lock(&g_encoder_data_mutex);
+        position = g_encoder_position;
+        velocity = g_encoder_velocity;
+        pthread_mutex_unlock(&g_encoder_data_mutex);
         
-        /* 打印线程统计信息 */
-        thread_mgr_print_status(&g_thread_mgr);
+        /* 计算读取成功率 */
+        uint32_t reads = g_encoder.read_count - last_read_count;
+        uint32_t errors = g_encoder.error_count - last_error_count;
+        last_read_count = g_encoder.read_count;
+        last_error_count = g_encoder.error_count;
         
-        usleep(SYS_LOG_PERIOD_MS * 1000);
+        float success_rate = (reads + errors > 0) ? 
+            (100.0f * reads / (reads + errors)) : 0.0f;
+        
+        /* 计算角度 */
+        float angle = encoder_position_to_angle((uint16_t)position, ENCODER_RESOLUTION);
+        
+        /* 打印编码器数据 */
+        LOG_INFO(LOG_MODULE_ENCODER, 
+            "Pos=%5d Angle=%6.2f° | Reads: %u, Errors: %u, Success: %.1f%%",
+            position, angle, reads, errors, success_rate);
+        
+        /* 2Hz = 500ms周期 */
+        usleep(ENCODER_PRINT_PERIOD_MS * 1000);
     }
     
     ctrl->state = THREAD_STATE_STOPPED;
-    LOG_INFO(LOG_MODULE_SYS, "Log thread stopped");
+    LOG_INFO(LOG_MODULE_ENCODER, "Encoder print thread stopped");
+    
+    return NULL;
+}
+
+/******************************************************************************
+ * 压力传感器数据采集线程 - 10Hz读取
+ ******************************************************************************/
+void* pressure_data_thread(void* arg) {
+    ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
+    struct timespec ts_start, ts_end;
+    double cycle_time_ms;
+    float pressure;
+    
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure data thread started (10Hz)");
+    
+    ctrl->state = THREAD_STATE_RUNNING;
+    
+    while (!thread_should_exit(ctrl) && g_running) {
+        clock_gettime(CLOCK_MONOTONIC, &ts_start);
+        
+        /* 读取压力值 */
+        if (pressure_read(&g_pressure, &pressure) == ERR_OK) {
+            /* 更新全局数据 */
+            pthread_mutex_lock(&g_pressure_data_mutex);
+            g_pressure_value = pressure;
+            pthread_mutex_unlock(&g_pressure_data_mutex);
+        }
+        /* 读取失败不阻塞，继续下一次读取 */
+        
+        /* 计算周期时间 */
+        clock_gettime(CLOCK_MONOTONIC, &ts_end);
+        cycle_time_ms = (ts_end.tv_sec - ts_start.tv_sec) * 1000.0 +
+                        (ts_end.tv_nsec - ts_start.tv_nsec) / 1000000.0;
+        
+        thread_update_stats(ctrl, cycle_time_ms);
+        
+        /* 10Hz = 100ms周期 */
+        int sleep_us = PRESSURE_READ_PERIOD_MS * 1000 - (int)(cycle_time_ms * 1000);
+        if (sleep_us > 0) {
+            usleep(sleep_us);
+        }
+    }
+    
+    ctrl->state = THREAD_STATE_STOPPED;
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure data thread stopped");
+    
+    return NULL;
+}
+
+/******************************************************************************
+ * 压力传感器打印线程 - 2Hz打印
+ ******************************************************************************/
+void* pressure_print_thread(void* arg) {
+    ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
+    float pressure;
+    
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure print thread started (2Hz)");
+    
+    ctrl->state = THREAD_STATE_RUNNING;
+    
+    while (!thread_should_exit(ctrl) && g_running) {
+        /* 获取压力数据 */
+        pthread_mutex_lock(&g_pressure_data_mutex);
+        pressure = g_pressure_value;
+        pthread_mutex_unlock(&g_pressure_data_mutex);
+        
+        /* 打印压力数据 */
+        LOG_INFO(LOG_MODULE_PRESSURE, "Pressure=%7.3f N", pressure);
+        
+        /* 2Hz = 500ms周期 */
+        usleep(PRESSURE_PRINT_PERIOD_MS * 1000);
+    }
+    
+    ctrl->state = THREAD_STATE_STOPPED;
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure print thread stopped");
     
     return NULL;
 }
@@ -210,23 +323,50 @@ ErrorCode_t system_init(void) {
         return ret;
     }
     
-    /* 初始化电机驱动 */
+    /* 初始化RS485总线（编码器和压力传感器共用） */
+    LOG_INFO(LOG_MODULE_SYS, "Initializing RS485 bus...");
+    ret = rs485_bus_init(ENCODER_UART_DEVICE, ENCODER_UART_BAUDRATE);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to initialize RS485 bus");
+        return ret;
+    }
+    LOG_INFO(LOG_MODULE_SYS, "RS485 bus initialized");
+    
+    /* 初始化电机驱动 - 编码器模式下可跳过 */
     LOG_INFO(LOG_MODULE_MOTOR, "Initializing motor driver...");
     ret = motor_init(&g_motor, MOTOR_NODE_ID, MOTOR_CAN_INTERFACE);
     if (ret != ERR_OK) {
-        LOG_ERROR(LOG_MODULE_MOTOR, "Failed to initialize motor driver");
+        LOG_WARN(LOG_MODULE_MOTOR, "Failed to initialize motor driver (may be OK for encoder-only mode)");
+        /* 不返回错误，继续初始化编码器 */
+    } else {
+        LOG_INFO(LOG_MODULE_MOTOR, "Motor driver initialized (Node ID=%d)", MOTOR_NODE_ID);
+    }
+    
+    /* 初始化编码器驱动 */
+    LOG_INFO(LOG_MODULE_ENCODER, "Initializing encoder driver...");
+    ret = encoder_init(&g_encoder, ENCODER_UART_DEVICE, ENCODER_UART_BAUDRATE, ENCODER_SLAVE_ADDR);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_ENCODER, "Failed to initialize encoder driver");
+        rs485_bus_deinit();
+        motor_deinit(&g_motor);
         return ret;
     }
-    LOG_INFO(LOG_MODULE_MOTOR, "Motor driver initialized (Node ID=%d)", MOTOR_NODE_ID);
+    LOG_INFO(LOG_MODULE_ENCODER, "Encoder driver initialized (Addr=%d)", ENCODER_SLAVE_ADDR);
+    
+    /* 初始化压力传感器驱动 */
+    LOG_INFO(LOG_MODULE_PRESSURE, "Initializing pressure driver...");
+    ret = pressure_init(&g_pressure, PRESSURE_UART_DEVICE, PRESSURE_UART_BAUDRATE, PRESSURE_SLAVE_ADDR);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_PRESSURE, "Failed to initialize pressure driver");
+        encoder_deinit(&g_encoder);
+        rs485_bus_deinit();
+        motor_deinit(&g_motor);
+        return ret;
+    }
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure driver initialized (Addr=%d)", PRESSURE_SLAVE_ADDR);
     
     /* TODO: 初始化电源板驱动（待实现） */
     /* power_init(&g_power, POWER_UART_DEVICE, POWER_UART_BAUDRATE); */
-    
-    /* TODO: 初始化编码器驱动（待实现） */
-    /* encoder_init(&g_encoder, ENCODER_UART_DEVICE, ENCODER_UART_BAUDRATE, ENCODER_SLAVE_ADDR); */
-    
-    /* TODO: 初始化压力计驱动（待实现） */
-    /* pressure_init(&g_pressure, PRESSURE_UART_DEVICE, PRESSURE_UART_BAUDRATE, PRESSURE_SLAVE_ADDR); */
     
     g_system_state = SYS_STATE_READY;
     LOG_INFO(LOG_MODULE_SYS, "System initialization completed");
@@ -246,8 +386,15 @@ void system_deinit(void) {
     /* 反初始化设备 */
     motor_deinit(&g_motor);
     power_deinit(&g_power);
-    encoder_deinit(&g_encoder);
     pressure_deinit(&g_pressure);
+    encoder_deinit(&g_encoder);
+    
+    /* 反初始化RS485总线 */
+    rs485_bus_deinit();
+    
+    /* 销毁互斥锁 */
+    pthread_mutex_destroy(&g_encoder_data_mutex);
+    pthread_mutex_destroy(&g_pressure_data_mutex);
     
     /* 反初始化线程管理器 */
     thread_mgr_deinit(&g_thread_mgr);
@@ -259,53 +406,84 @@ void system_deinit(void) {
 /******************************************************************************
  * 创建系统线程
  ******************************************************************************/
-ErrorCode_t create_system_threads(void) {
+ErrorCode_t create_system_threads(int motor_enabled) {
     ErrorCode_t ret;
     ThreadConfig_t config;
     
-    /* 创建控制线程 */
-    config.type = THREAD_TYPE_CONTROL;
-    config.name = "Control";
-    config.priority = THREAD_PRIORITY_HIGH;
-    config.period_ms = SYS_CONTROL_PERIOD_MS;
-    config.func = control_thread;
-    config.arg = NULL;
-    
-    ret = thread_mgr_create(&g_thread_mgr, &config);
-    if (ret != ERR_OK) {
-        LOG_ERROR(LOG_MODULE_SYS, "Failed to create control thread");
-        return ret;
-    }
-    
-    /* 创建数据采集线程 */
+    /* 创建编码器数据采集线程 (50Hz) */
     config.type = THREAD_TYPE_DATA;
-    config.name = "DataAcq";
+    config.name = "EncoderData";
     config.priority = THREAD_PRIORITY_NORMAL;
-    config.period_ms = SYS_DATA_RECORD_PERIOD_MS;
-    config.func = data_thread;
+    config.period_ms = ENCODER_READ_PERIOD_MS;
+    config.func = encoder_data_thread;
     config.arg = NULL;
     
     ret = thread_mgr_create(&g_thread_mgr, &config);
     if (ret != ERR_OK) {
-        LOG_ERROR(LOG_MODULE_SYS, "Failed to create data thread");
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create encoder data thread");
         return ret;
     }
     
-    /* 创建日志线程 */
+    /* 创建编码器打印线程 (2Hz) */
     config.type = THREAD_TYPE_LOG;
-    config.name = "Logger";
+    config.name = "EncoderPrint";
     config.priority = THREAD_PRIORITY_LOW;
-    config.period_ms = SYS_LOG_PERIOD_MS;
-    config.func = log_thread;
+    config.period_ms = ENCODER_PRINT_PERIOD_MS;
+    config.func = encoder_print_thread;
     config.arg = NULL;
     
     ret = thread_mgr_create(&g_thread_mgr, &config);
     if (ret != ERR_OK) {
-        LOG_ERROR(LOG_MODULE_SYS, "Failed to create log thread");
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create encoder print thread");
         return ret;
     }
     
-    LOG_INFO(LOG_MODULE_SYS, "All system threads created");
+    /* 创建压力传感器数据采集线程 (10Hz) */
+    config.type = THREAD_TYPE_DATA;
+    config.name = "PressureData";
+    config.priority = THREAD_PRIORITY_NORMAL;
+    config.period_ms = PRESSURE_READ_PERIOD_MS;
+    config.func = pressure_data_thread;
+    config.arg = NULL;
+    
+    ret = thread_mgr_create(&g_thread_mgr, &config);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create pressure data thread");
+        return ret;
+    }
+    
+    /* 创建压力传感器打印线程 (2Hz) */
+    config.type = THREAD_TYPE_LOG;
+    config.name = "PressurePrint";
+    config.priority = THREAD_PRIORITY_LOW;
+    config.period_ms = PRESSURE_PRINT_PERIOD_MS;
+    config.func = pressure_print_thread;
+    config.arg = NULL;
+    
+    ret = thread_mgr_create(&g_thread_mgr, &config);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create pressure print thread");
+        return ret;
+    }
+    
+    /* 如果电机使能，创建控制线程 */
+    if (motor_enabled) {
+        config.type = THREAD_TYPE_CONTROL;
+        config.name = "Control";
+        config.priority = THREAD_PRIORITY_HIGH;
+        config.period_ms = SYS_CONTROL_PERIOD_MS;
+        config.func = control_thread;
+        config.arg = NULL;
+        
+        ret = thread_mgr_create(&g_thread_mgr, &config);
+        if (ret != ERR_OK) {
+            LOG_ERROR(LOG_MODULE_SYS, "Failed to create control thread");
+            return ret;
+        }
+    }
+    
+    LOG_INFO(LOG_MODULE_SYS, "All system threads created (motor %s)", 
+             motor_enabled ? "enabled" : "disabled");
     return ERR_OK;
 }
 
@@ -314,6 +492,15 @@ ErrorCode_t create_system_threads(void) {
  ******************************************************************************/
 int main(int argc, char *argv[]) {
     ErrorCode_t ret;
+    int motor_enabled = 1;
+    
+    /* 解析命令行参数 */
+    if (argc > 1) {
+        if (strcmp(argv[1], "--no-motor") == 0 || strcmp(argv[1], "-n") == 0) {
+            motor_enabled = 0;
+            printf("Motor control disabled (encoder-only mode)\n");
+        }
+    }
     
     /* 注册信号处理 */
     signal(SIGINT, signal_handler);
@@ -335,7 +522,7 @@ int main(int argc, char *argv[]) {
     }
     
     /* 创建系统线程 */
-    ret = create_system_threads();
+    ret = create_system_threads(motor_enabled);
     if (ret != ERR_OK) {
         LOG_ERROR(LOG_MODULE_SYS, "Failed to create system threads");
         system_deinit();
@@ -345,7 +532,11 @@ int main(int argc, char *argv[]) {
     
     /* 主循环 */
     g_system_state = SYS_STATE_RUNNING;
-    LOG_INFO(LOG_MODULE_SYS, "System is running, press Ctrl+C to stop...");
+    if (motor_enabled) {
+        LOG_INFO(LOG_MODULE_SYS, "System is running with motor control, press Ctrl+C to stop...");
+    } else {
+        LOG_INFO(LOG_MODULE_SYS, "System is running (encoder+pressure mode), press Ctrl+C to stop...");
+    }
     
     /* 运行指定时间后自动停止 */
     sleep(DEMO_RUN_TIME_S);

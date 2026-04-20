@@ -42,7 +42,7 @@ extern "C" {
 /******************************************************************************
  * 电源板配置 (UART - TTL)
  ******************************************************************************/
-#define POWER_UART_DEVICE       "/dev/ttyUSB0"  /* 根据实际设备修改 */
+#define POWER_UART_DEVICE       "/dev/ttyUSB1"  /* 根据实际设备修改 */
 #define POWER_UART_BAUDRATE     115200
 #define POWER_UART_DATA_BITS    8
 #define POWER_UART_STOP_BITS    1
@@ -56,7 +56,7 @@ extern "C" {
 /******************************************************************************
  * 编码器配置 (RS485)
  ******************************************************************************/
-#define ENCODER_UART_DEVICE     "/dev/ttyUSB1"  /* 与压力计共用USB转485 */
+#define ENCODER_UART_DEVICE     "/dev/ttyUSB0"  /* USB转RS485设备 - 编码器 */
 #define ENCODER_UART_BAUDRATE   9600
 #define ENCODER_UART_DATA_BITS  8
 #define ENCODER_UART_STOP_BITS  1
@@ -65,18 +65,31 @@ extern "C" {
 #define ENCODER_SLAVE_ADDR      1           /* RS485设备地址 */
 #define ENCODER_RESOLUTION      4096        /* 编码器分辨率 */
 
-/******************************************************************************
- * 压力计配置 (RS485)
- ******************************************************************************/
-#define PRESSURE_UART_DEVICE    "/dev/ttyUSB1"  /* 与编码器共用USB转485 */
+/* 编码器读取频率配置 */
+#define ENCODER_READ_PERIOD_MS      20      /* 编码器读取周期 50Hz (原100Hz可能太快) */
+#define ENCODER_PRINT_PERIOD_MS     500     /* 编码器打印周期 2Hz */
+#define ENCODER_MODBUS_REG_ADDR     0x0000  /* 位置数据寄存器地址 */
+#define ENCODER_MODBUS_FUNC_CODE    0x03    /* 读取保持寄存器功能码 */
+
+/* 编码器调试选项 */
+#define ENCODER_DEBUG_RAW_DATA      0       /* 打印原始Modbus数据帧用于调试 */
+
+/* 压力计配置 (RS485) */
+#define PRESSURE_UART_DEVICE    "/dev/ttyUSB0"  /* 与编码器共用USB转485 */
 #define PRESSURE_UART_BAUDRATE  9600
 #define PRESSURE_UART_DATA_BITS 8
 #define PRESSURE_UART_STOP_BITS 1
 #define PRESSURE_UART_PARITY    'N'
 
-#define PRESSURE_SLAVE_ADDR     2           /* RS485设备地址 */
-#define PRESSURE_MAX_RANGE      1000        /* 最大量程 (N或其他单位) */
-#define PRESSURE_ZERO_OFFSET    0           /* 零点偏移 */
+#define PRESSURE_SLAVE_ADDR     1           /* RS485设备地址 (根据手册示例为01) */
+#define PRESSURE_MAX_RANGE      1000.0f     /* 最大量程 (N或其他单位) */
+#define PRESSURE_ZERO_OFFSET    0.0f        /* 零点偏移 */
+
+/* 压力计读取频率配置 */
+#define PRESSURE_READ_PERIOD_MS     100     /* 压力计读取周期 10Hz */
+#define PRESSURE_PRINT_PERIOD_MS    500     /* 压力计打印周期 2Hz */
+#define PRESSURE_MODBUS_REG_ADDR    0x0000  /* 压力值寄存器地址 */
+#define PRESSURE_MODBUS_FUNC_CODE   0x03    /* 读取保持寄存器功能码 */
 
 /******************************************************************************
  * 系统运行参数
