@@ -1,9 +1,14 @@
 /******************************************************************************
  * @file    pressure_driver.h
- * @brief   压力计驱动 - RS485接口压力传感器
+ * @brief   压力计驱动 - RS485接口压力传感器 (Modbus RTU)
  * @author  System Architect
- * @date    2026-04-16
- * @version 1.0.0
+ * @date    2026-04-20
+ * @version 1.1.0
+ * 
+ * 协议说明：
+ * - Modbus RTU协议，功能码03（读取）、06（写入）
+ * - 寄存器0x00：压力值
+ * - 寄存器0x01：小数点设置（3=保留3位小数）
  ******************************************************************************/
 
 #ifndef __PRESSURE_DRIVER_H__
@@ -26,11 +31,15 @@ typedef struct {
     int baudrate;               /* 波特率 */
     uint8_t slave_addr;         /* RS485设备地址 */
     int fd;                     /* 串口文件描述符 */
+    uint8_t decimal_places;     /* 小数点位数 */
     
     /* 数据 */
-    float pressure;             /* 压力值 */
-    float max_range;            /* 最大量程 */
+    float pressure;             /* 压力值 (kg) */
     float zero_offset;          /* 零点偏移 */
+    
+    /* 统计 */
+    uint32_t read_count;        /* 读取次数 */
+    uint32_t error_count;       /* 错误次数 */
     
     /* 线程安全 */
     pthread_mutex_t mutex;
@@ -38,7 +47,7 @@ typedef struct {
 } PressureDriver_t;
 
 /******************************************************************************
- * 函数声明 - 待实现
+ * 函数声明
  ******************************************************************************/
 
 /**
@@ -59,9 +68,17 @@ ErrorCode_t pressure_init(PressureDriver_t *pressure, const char *device,
 void pressure_deinit(PressureDriver_t *pressure);
 
 /**
+ * @brief 设置小数点位数（功能码06）
+ * @param pressure 压力计驱动结构指针
+ * @param decimal_places 小数点位数 (0-3)
+ * @return ErrorCode_t
+ */
+ErrorCode_t pressure_set_decimal(PressureDriver_t *pressure, uint8_t decimal_places);
+
+/**
  * @brief 读取压力值
  * @param pressure 压力计驱动结构指针
- * @param value 压力输出指针
+ * @param value 压力输出指针 (kg)
  * @return ErrorCode_t
  */
 ErrorCode_t pressure_read(PressureDriver_t *pressure, float *value);

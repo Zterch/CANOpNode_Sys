@@ -3,7 +3,7 @@
  * @brief   线程管理器 - 统一管理所有系统线程
  * @author  System Architect
  * @date    2026-04-16
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************/
 
 #ifndef __THREAD_MANAGER_H__
@@ -26,6 +26,7 @@ typedef enum {
     THREAD_TYPE_LOG,            /* 日志线程 */
     THREAD_TYPE_COMM,           /* 通信线程 */
     THREAD_TYPE_ALGO,           /* 算法线程 */
+    THREAD_TYPE_USER,           /* 用户自定义线程 */
     THREAD_TYPE_NUM             /* 线程类型数量 */
 } ThreadType_t;
 
@@ -75,13 +76,16 @@ typedef struct {
     ThreadConfig_t config;      /* 配置信息 */
     pthread_mutex_t mutex;      /* 状态互斥锁 */
     int should_exit;            /* 退出标志 */
+    int active;                 /* 是否激活 */
 } ThreadCtrl_t;
 
 /******************************************************************************
- * 线程管理器
+ * 线程管理器 - 支持最多16个线程
  ******************************************************************************/
+#define MAX_THREADS 16
+
 typedef struct {
-    ThreadCtrl_t threads[THREAD_TYPE_NUM];
+    ThreadCtrl_t threads[MAX_THREADS];
     int thread_count;
     pthread_mutex_t mutex;
     SystemState_t system_state;
@@ -113,12 +117,12 @@ void thread_mgr_deinit(ThreadManager_t *mgr);
 ErrorCode_t thread_mgr_create(ThreadManager_t *mgr, const ThreadConfig_t *config);
 
 /**
- * @brief 停止指定类型的线程
+ * @brief 停止指定索引的线程
  * @param mgr 线程管理器指针
- * @param type 线程类型
+ * @param index 线程索引
  * @return ErrorCode_t
  */
-ErrorCode_t thread_mgr_stop(ThreadManager_t *mgr, ThreadType_t type);
+ErrorCode_t thread_mgr_stop_by_index(ThreadManager_t *mgr, int index);
 
 /**
  * @brief 停止所有线程
@@ -127,37 +131,37 @@ ErrorCode_t thread_mgr_stop(ThreadManager_t *mgr, ThreadType_t type);
 void thread_mgr_stop_all(ThreadManager_t *mgr);
 
 /**
- * @brief 暂停指定类型的线程
+ * @brief 暂停指定索引的线程
  * @param mgr 线程管理器指针
- * @param type 线程类型
+ * @param index 线程索引
  * @return ErrorCode_t
  */
-ErrorCode_t thread_mgr_pause(ThreadManager_t *mgr, ThreadType_t type);
+ErrorCode_t thread_mgr_pause_by_index(ThreadManager_t *mgr, int index);
 
 /**
- * @brief 恢复指定类型的线程
+ * @brief 恢复指定索引的线程
  * @param mgr 线程管理器指针
- * @param type 线程类型
+ * @param index 线程索引
  * @return ErrorCode_t
  */
-ErrorCode_t thread_mgr_resume(ThreadManager_t *mgr, ThreadType_t type);
+ErrorCode_t thread_mgr_resume_by_index(ThreadManager_t *mgr, int index);
 
 /**
  * @brief 获取线程状态
  * @param mgr 线程管理器指针
- * @param type 线程类型
+ * @param index 线程索引
  * @return ThreadState_t
  */
-ThreadState_t thread_mgr_get_state(ThreadManager_t *mgr, ThreadType_t type);
+ThreadState_t thread_mgr_get_state_by_index(ThreadManager_t *mgr, int index);
 
 /**
  * @brief 获取线程统计信息
  * @param mgr 线程管理器指针
- * @param type 线程类型
+ * @param index 线程索引
  * @param stats 统计信息输出
  * @return ErrorCode_t
  */
-ErrorCode_t thread_mgr_get_stats(ThreadManager_t *mgr, ThreadType_t type, ThreadStats_t *stats);
+ErrorCode_t thread_mgr_get_stats_by_index(ThreadManager_t *mgr, int index, ThreadStats_t *stats);
 
 /**
  * @brief 打印所有线程状态

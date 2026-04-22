@@ -4,9 +4,9 @@
 
 CANOpNode_Sys 是一个工业级多设备控制系统，集成了以下设备：
 - **Nimotion CANopen伺服电机**（通过SocketCAN控制）
-- **电源板**（UART/TTL串口控制电流输出）
-- **编码器**（RS485接口，Modbus RTU协议）
-- **压力计**（RS485接口）
+- **电源板**（UART/TTL串口控制电流输出 0-4A）
+- **编码器**（RS485接口，Modbus RTU协议，地址1）
+- **压力计**（RS485接口，Modbus RTU协议，地址2，3位小数精度）
 
 ## 系统架构
 
@@ -16,14 +16,15 @@ CANOpNode_Sys/
 │   └── system_config.h     # 系统配置参数
 ├── drivers/                # 驱动层
 │   ├── motor_driver.h/.c   # 电机驱动（CANopen协议）✅
-│   ├── power_driver.h/.c   # 电源板驱动（待实现）
+│   ├── power_driver.h/.c   # 电源板驱动（自定义协议）✅
 │   ├── encoder_driver.h/.c # 编码器驱动（Modbus RTU）✅
-│   └── pressure_driver.h/.c# 压力计驱动（待实现）
+│   ├── pressure_driver.h/.c# 压力计驱动（Modbus RTU）✅
+│   └── rs485_bus.h/.c      # RS485总线管理器 ✅
 ├── algorithms/             # 算法层
 │   ├── sine_wave.h/.c      # 正弦波生成算法 ✅
 ├── utils/                  # 工具层
 │   ├── logger.h/.c         # 日志系统 ✅
-│   └── thread_manager.h/.c # 线程管理器 ✅
+│   └── thread_manager.h/.c # 线程管理器 ✅（支持多线程）
 ├── main.c                  # 主程序 ✅
 ├── Makefile                # 构建系统 ✅
 └── README.md               # 说明文档
@@ -32,10 +33,11 @@ CANOpNode_Sys/
 ### 架构特点
 
 1. **分层设计**：清晰的层次结构，便于维护和扩展
-2. **多线程架构**：控制、数据采集、日志分离
+2. **多线程架构**：支持最多16个线程，控制、数据采集、日志分离
 3. **线程安全**：所有共享资源使用互斥锁保护
 4. **实时性**：支持Linux实时调度策略
 5. **可配置**：集中式配置管理
+6. **RS485总线管理**：编码器和压力计共用串口，统一管理避免冲突
 
 ---
 
@@ -60,21 +62,15 @@ make
 
 #### 2. 仅重新编译修改的文件
 
-如果只修改了部分源文件，直接运行：
-
 ```bash
 make
 ```
-
-Make会自动检测修改的文件并只编译变化的部分。
 
 #### 3. 调试模式编译
 
 ```bash
 make debug
 ```
-
-调试模式会添加 `-g` 选项，便于使用GDB调试。
 
 #### 4. 发布模式编译
 
@@ -100,11 +96,21 @@ bin/CANOpNode_Sys
 编辑 `config/system_config.h` 确认设备配置：
 
 ```c
-/* 编码器配置 */
-#define ENCODER_UART_DEVICE     "/dev/ttyUSB1"  /* RS485设备 */
-#define ENCODER_UART_BAUDRATE   9600
-#define ENCODER_SLAVE_ADDR      1               /* Modbus地址 */
-#define ENCODER_RESOLUTION      4096            /* 编码器分辨率 */
+/* 编码器配置（RS485，地址1） */
+#define ENCODER_UART_DEVICE     "/dev/ttyUSB1"
+#define ENCODER_UART_BAUDRATE   115200
+#define ENCODER_SLAVE_ADDR      1
+#define ENCODER_RESOLUTION      4096
+
+/* 压力计配置（RS485，地址2） */
+#define PRESSURE_UART_DEVICE    "/dev/ttyUSB1"  /* 与编码器共用 */
+#define PRESSURE_UART_BAUDRATE  115200
+#define PRESSURE_SLAVE_ADDR     2
+#define PRESSURE_DECIMAL_PLACES 3               /* 3位小数 */
+
+/* 电源板配置（UART/TTL） */
+#define POWER_UART_DEVICE       "/dev/ttyUSB0"
+#define POWER_UART_BAUDRATE     115200
 
 /* 电机配置 */
 #define MOTOR_CAN_INTERFACE     "can0"
@@ -121,7 +127,7 @@ ls -l /dev/ttyUSB*
 sudo usermod -a -G dialout $USER
 
 # 临时设置权限（立即生效）
-sudo chmod 666 /dev/ttyUSB1
+sudo chmod 666 /dev/ttyUSB0 /dev/ttyUSB1
 ```
 
 #### 3. 启动CAN接口（如使用电机）
@@ -137,7 +143,7 @@ ip link show can0
 
 ### 运行模式
 
-#### 模式1：纯编码器测试（电机不上电）
+#### 模式1：传感器测试模式（电机不上电）
 
 ```bash
 sudo ./bin/CANOpNode_Sys --no-motor
@@ -150,25 +156,24 @@ sudo ./bin/CANOpNode_Sys -n
 
 **输出示例：**
 ```
-[INFO]  [ENCODER] Pos=  322 Angle= 28.30° | Reads: 50, Errors: 0, Success: 100.0%
-[INFO]  [ENCODER] Pos=  450 Angle= 39.55° | Reads: 50, Errors: 0, Success: 100.0%
+[INFO] [ENCODER] Pos=  322 Angle= 28.30° | Reads: 50, Errors: 0, Success: 100.0%
+[INFO] [PRESSURE] Pressure=  1.234 kg
+[INFO] [POWER] Voltage=24.00V Current=0.44A | Reads: 50
+...
+[INFO] [POWER] Current set to 600 mA (0.60 A)  /* 5秒后自动设置 */
 ```
 
-#### 模式2：完整系统（电机+编码器）
+#### 模式2：完整系统（电机+所有传感器）
 
 ```bash
 sudo ./bin/CANOpNode_Sys
 ```
-
-**注意：** 确保电机已上电并连接好CAN总线。
 
 #### 模式3：使用make运行
 
 ```bash
 make run
 ```
-
-这会自动使用sudo运行程序。
 
 ### 停止程序
 
@@ -182,20 +187,14 @@ make run
 ### 场景1：修改配置文件
 
 ```bash
-# 编辑配置文件
 vim config/system_config.h
-
-# 重新编译（修改头文件会触发相关文件重新编译）
 make
 ```
 
 ### 场景2：修改驱动代码
 
 ```bash
-# 例如修改编码器驱动
-vim drivers/encoder_driver.c
-
-# 重新编译
+vim drivers/pressure_driver.c
 make
 
 # 如果修改了头文件，建议清理后重新编译
@@ -205,10 +204,7 @@ make clean && make
 ### 场景3：修改主程序
 
 ```bash
-# 修改主程序
 vim main.c
-
-# 重新编译
 make
 ```
 
@@ -231,14 +227,12 @@ make clean && make
 
 ### 编码器参数配置
 
-编辑 `config/system_config.h`：
-
 ```c
 /* 编码器串口设备 */
 #define ENCODER_UART_DEVICE     "/dev/ttyUSB1"
 
 /* 波特率 */
-#define ENCODER_UART_BAUDRATE   9600
+#define ENCODER_UART_BAUDRATE   115200
 
 /* Modbus从机地址 */
 #define ENCODER_SLAVE_ADDR      1
@@ -247,11 +241,47 @@ make clean && make
 #define ENCODER_RESOLUTION      4096
 
 /* 读取频率 */
-#define ENCODER_READ_PERIOD_MS  10      /* 100Hz */
+#define ENCODER_READ_PERIOD_MS  20      /* 50Hz */
 #define ENCODER_PRINT_PERIOD_MS 500     /* 2Hz */
+```
 
-/* Modbus寄存器地址 */
-#define ENCODER_MODBUS_REG_ADDR 0x0000  /* 西门子PLC地址40001 */
+### 压力计参数配置
+
+```c
+/* 压力计串口设备（与编码器共用） */
+#define PRESSURE_UART_DEVICE    "/dev/ttyUSB1"
+
+/* 波特率 */
+#define PRESSURE_UART_BAUDRATE  115200
+
+/* Modbus从机地址 */
+#define PRESSURE_SLAVE_ADDR     2       /* 设备地址2 */
+
+/* 小数点位数 */
+#define PRESSURE_DECIMAL_PLACES 3       /* 3位小数，分辨率0.001kg */
+
+/* 读取频率 */
+#define PRESSURE_READ_PERIOD_MS     20  /* 50Hz */
+#define PRESSURE_PRINT_PERIOD_MS    1000 /* 1Hz */
+```
+
+### 电源板参数配置
+
+```c
+/* 电源板串口设备 */
+#define POWER_UART_DEVICE       "/dev/ttyUSB0"
+
+/* 波特率 */
+#define POWER_UART_BAUDRATE     115200
+
+/* 电流范围 */
+#define POWER_MAX_CURRENT       4000    /* 最大4A */
+#define POWER_MIN_CURRENT       50      /* 最小0.05A */
+#define POWER_DEFAULT_CURRENT   440     /* 默认0.44A */
+
+/* 读取频率 */
+#define POWER_READ_PERIOD_MS    20      /* 50Hz */
+#define POWER_PRINT_PERIOD_MS   1000    /* 1Hz */
 ```
 
 ### 电机参数配置
@@ -276,18 +306,25 @@ make clean && make
 #define DEMO_RUN_TIME_S         10
 
 /* 日志级别 */
-#define SYSTEM_LOG_LEVEL        3       /* 0=ERROR, 1=WARN, 2=INFO, 3=DEBUG */
+#define SYSTEM_LOG_LEVEL        2       /* 0=ERROR, 1=WARN, 2=INFO, 3=DEBUG */
 ```
 
 ---
 
 ## 线程架构
 
-| 线程 | 优先级 | 周期 | 功能 | 条件 |
-|------|--------|------|------|------|
-| EncoderData | 中(50) | 10ms | 100Hz读取编码器 | 始终运行 |
-| EncoderPrint | 低(20) | 500ms | 2Hz打印编码器数据 | 始终运行 |
-| Control | 高(80) | 10ms | 电机控制 | 电机模式启用 |
+系统使用改进的线程管理器，支持最多16个线程：
+
+| 线程名 | 类型 | 优先级 | 周期 | 功能 |
+|--------|------|--------|------|------|
+| EncoderData | DATA | 中(50) | 20ms | 50Hz读取编码器 |
+| EncoderPrint | LOG | 低(20) | 500ms | 2Hz打印编码器数据 |
+| PressureData | DATA | 中(50) | 20ms | 50Hz读取压力计 |
+| PressurePrint | LOG | 低(20) | 1000ms | 1Hz打印压力数据 |
+| PowerData | DATA | 中(50) | 20ms | 50Hz读取电源板 |
+| PowerPrint | LOG | 低(20) | 1000ms | 1Hz打印电源数据 |
+| PowerTest | CONTROL | 中(50) | - | 5秒后设置电流0.6A |
+| Control | CONTROL | 高(80) | 10ms | 电机控制（可选） |
 
 ---
 
@@ -297,16 +334,49 @@ make clean && make
 
 **现象：**
 ```
-[WARN]  Modbus response timeout or incomplete
+[WARN] Modbus response timeout or incomplete
 ```
 
 **排查步骤：**
 1. 检查设备连接：`ls -l /dev/ttyUSB1`
 2. 检查设备权限：`sudo chmod 666 /dev/ttyUSB1`
-3. 验证Modbus地址：`#define ENCODER_SLAVE_ADDR 1`
-4. 检查波特率设置是否匹配
+3. 验证Modbus地址：编码器地址1，压力计地址2
+4. 检查波特率设置是否匹配（默认115200）
 
-### 问题2：CAN接口错误
+### 问题2：压力计小数点设置失败
+
+**现象：**
+```
+[WARN] Failed to set decimal places to 3
+```
+
+**排查步骤：**
+1. 确认压力计设备地址已设置为2
+2. 检查RS485总线连接
+3. 尝试断电重启压力计
+
+### 问题3：电源板通信失败
+
+**现象：**
+```
+[ERROR] Failed to open /dev/ttyUSB0
+```
+
+**排查步骤：**
+1. 检查UART/TTL连接
+2. 确认设备节点：`ls -l /dev/ttyUSB*`
+3. 检查波特率是否匹配（默认115200）
+
+### 问题4：线程创建失败
+
+**现象：**
+```
+[ERROR] Maximum thread count (16) reached
+```
+
+**解决：** 系统最多支持16个线程，请检查线程配置。
+
+### 问题5：CAN接口错误
 
 **现象：**
 ```
@@ -315,28 +385,118 @@ make clean && make
 
 **解决：**
 ```bash
-# 启动CAN接口
-sudo ip link set can0 up
-
-# 或重新配置
 sudo ip link set can0 type can bitrate 1000000
 sudo ip link set can0 up
 ```
 
-### 问题3：权限不足
+---
 
-**现象：**
-```
-Failed to open /dev/ttyUSB1: Permission denied
-```
+## GitHub 推送指南
 
-**解决：**
+### 首次推送（已配置）
+
 ```bash
-# 临时方案
-sudo chmod 666 /dev/ttyUSB1
+cd /home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys
 
-# 永久方案（需重新登录）
-sudo usermod -a -G dialout $USER
+# 1. 查看修改状态
+git status
+
+# 2. 添加所有修改
+git add -A
+
+# 3. 提交修改
+git commit -m "更新说明：添加电源板驱动和压力计小数点设置"
+
+# 4. 推送到GitHub（使用token，将YOUR_TOKEN替换为实际token）
+git remote set-url origin https://YOUR_TOKEN@github.com/Zterch/CANOpNode_Sys.git
+git push origin main
+
+# 5. （可选）清除token缓存
+git remote set-url origin https://github.com/Zterch/CANOpNode_Sys.git
+```
+
+### 后续手动推送步骤
+
+#### 方法1：使用Personal Access Token（推荐）
+
+```bash
+# 1. 进入项目目录
+cd /home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys
+
+# 2. 查看当前修改
+git status
+
+# 3. 添加修改的文件（全部添加）
+git add -A
+
+# 或添加指定文件
+git add config/system_config.h
+git add drivers/pressure_driver.c
+
+# 4. 提交修改
+git commit -m "修改说明"
+
+# 5. 设置远程URL（带token）
+git remote set-url origin https://YOUR_TOKEN@github.com/Zterch/CANOpNode_Sys.git
+
+# 6. 推送到main分支
+git push origin main
+
+# 7. 清除token（安全起见）
+git remote set-url origin https://github.com/Zterch/CANOpNode_Sys.git
+```
+
+#### 方法2：使用SSH密钥（更安全，长期有效）
+
+```bash
+# 1. 生成SSH密钥（如未生成）
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+# 2. 添加公钥到GitHub
+# 复制 ~/.ssh/id_ed25519.pub 内容到 GitHub -> Settings -> SSH and GPG keys -> New SSH key
+
+# 3. 修改远程URL为SSH格式
+git remote set-url origin git@github.com:Zterch/CANOpNode_Sys.git
+
+# 4. 后续推送只需
+git add -A
+git commit -m "修改说明"
+git push origin main
+```
+
+#### 方法3：使用Git Credential Helper（缓存密码）
+
+```bash
+# 配置credential缓存（15分钟）
+git config credential.helper cache
+
+# 或永久存储（存储在~/.git-credentials，注意安全性）
+git config credential.helper store
+
+# 推送时会提示输入用户名和token，之后会被缓存
+git push origin main
+```
+
+### 常用Git命令速查
+
+```bash
+# 查看状态
+git status
+
+# 查看修改内容
+git diff
+
+# 查看提交历史
+git log --oneline -10
+
+# 拉取远程更新（如有冲突需解决）
+git pull origin main
+
+# 强制推送（慎用，会覆盖远程）
+git push origin main --force
+
+# 查看远程URL
+git remote -v
 ```
 
 ---
@@ -380,18 +540,20 @@ sudo usermod -a -G dialout $USER
 ### ✅ 已实现
 - 系统架构搭建
 - 日志系统（彩色输出、文件记录）
-- 线程管理器（优先级、统计）
+- 线程管理器（支持16个线程、优先级、统计）
 - 正弦波算法
 - **电机驱动（完整CANopen实现）**
-- **编码器驱动（Modbus RTU，100Hz读取，2Hz打印）**
+- **编码器驱动（Modbus RTU，50Hz读取，2Hz打印）**
+- **压力计驱动（Modbus RTU，50Hz读取，1Hz打印，3位小数）**
+- **电源板驱动（自定义协议，50Hz读取，1Hz打印）**
+- **RS485总线管理器（编码器+压力计共用）**
 - 多线程控制框架
 - 构建系统
 
 ### ⏳ 待实现
-- 电源板驱动（UART协议待补充）
-- 压力计驱动（RS485协议待补充）
 - 数据处理算法
 - 数据记录功能
+- 网络通信接口
 
 ---
 
@@ -402,3 +564,7 @@ MIT License
 ## 作者
 
 System Architect
+
+## 仓库地址
+
+https://github.com/Zterch/CANOpNode_Sys.git

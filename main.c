@@ -58,6 +58,11 @@ static pthread_mutex_t g_encoder_data_mutex = PTHREAD_MUTEX_INITIALIZER;
 static float g_pressure_value = 0.0f;
 static pthread_mutex_t g_pressure_data_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/* 电源板全局数据 */
+static uint16_t g_power_current = 0;        /* 实际电流 (mA) */
+static uint16_t g_power_voltage = 0;        /* 实际电压 (mV) */
+static pthread_mutex_t g_power_data_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 /******************************************************************************
  * 信号处理
  ******************************************************************************/
@@ -134,7 +139,6 @@ void* encoder_data_thread(void* arg) {
     struct timespec ts_start, ts_end;
     double cycle_time_ms;
     int32_t position, velocity;
-    int read_ok;
     
     LOG_INFO(LOG_MODULE_ENCODER, "Encoder data thread started (50Hz)");
     
@@ -142,8 +146,6 @@ void* encoder_data_thread(void* arg) {
     
     while (!thread_should_exit(ctrl) && g_running) {
         clock_gettime(CLOCK_MONOTONIC, &ts_start);
-        
-        read_ok = 0;
         
         /* 读取编码器位置 (非阻塞，带超时) */
         if (encoder_read_position(&g_encoder, &position) == ERR_OK) {
@@ -157,11 +159,9 @@ void* encoder_data_thread(void* arg) {
             pthread_mutex_unlock(&g_encoder_data_mutex);
             
             g_encoder.read_count++;
-            read_ok = 1;
         } else {
             /* 读取失败，增加错误计数 */
             g_encoder.error_count++;
-            /* 但不阻塞，继续下一次读取 */
         }
         
         /* 计算周期时间 */
@@ -240,7 +240,7 @@ void* pressure_data_thread(void* arg) {
     double cycle_time_ms;
     float pressure;
     
-    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure data thread started (10Hz)");
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure data thread started (50Hz)");
     
     ctrl->state = THREAD_STATE_RUNNING;
     
@@ -263,7 +263,7 @@ void* pressure_data_thread(void* arg) {
         
         thread_update_stats(ctrl, cycle_time_ms);
         
-        /* 10Hz = 100ms周期 */
+        /* 50Hz = 20ms周期 */
         int sleep_us = PRESSURE_READ_PERIOD_MS * 1000 - (int)(cycle_time_ms * 1000);
         if (sleep_us > 0) {
             usleep(sleep_us);
@@ -277,13 +277,13 @@ void* pressure_data_thread(void* arg) {
 }
 
 /******************************************************************************
- * 压力传感器打印线程 - 2Hz打印
+ * 压力传感器打印线程 - 1Hz打印
  ******************************************************************************/
 void* pressure_print_thread(void* arg) {
     ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
     float pressure;
     
-    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure print thread started (2Hz)");
+    LOG_INFO(LOG_MODULE_PRESSURE, "Pressure print thread started (1Hz)");
     
     ctrl->state = THREAD_STATE_RUNNING;
     
@@ -294,15 +294,134 @@ void* pressure_print_thread(void* arg) {
         pthread_mutex_unlock(&g_pressure_data_mutex);
         
         /* 打印压力数据 */
-        LOG_INFO(LOG_MODULE_PRESSURE, "Pressure=%7.3f N", pressure);
+        LOG_INFO(LOG_MODULE_PRESSURE, "Pressure=%7.3f kg", pressure);
         
-        /* 2Hz = 500ms周期 */
+        /* 1Hz = 1000ms周期 */
         usleep(PRESSURE_PRINT_PERIOD_MS * 1000);
     }
     
     ctrl->state = THREAD_STATE_STOPPED;
     LOG_INFO(LOG_MODULE_PRESSURE, "Pressure print thread stopped");
     
+    return NULL;
+}
+
+/******************************************************************************
+ * 电源板数据采集线程 - 50Hz读取
+ ******************************************************************************/
+void* power_data_thread(void* arg) {
+    ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
+    struct timespec ts_start, ts_end;
+    double cycle_time_ms;
+    uint16_t current, voltage;
+    
+    LOG_INFO(LOG_MODULE_POWER, "Power data thread started (50Hz)");
+    
+    ctrl->state = THREAD_STATE_RUNNING;
+    
+    while (!thread_should_exit(ctrl) && g_running) {
+        clock_gettime(CLOCK_MONOTONIC, &ts_start);
+        
+        /* 读取电流和电压 */
+        if (power_get_status(&g_power, &current, &voltage) == ERR_OK) {
+            /* 更新全局数据 */
+            pthread_mutex_lock(&g_power_data_mutex);
+            g_power_current = current;
+            g_power_voltage = voltage;
+            pthread_mutex_unlock(&g_power_data_mutex);
+            
+            g_power.read_count++;
+        } else {
+            /* 读取失败，增加错误计数 */
+            g_power.error_count++;
+        }
+        
+        /* 计算周期时间 */
+        clock_gettime(CLOCK_MONOTONIC, &ts_end);
+        cycle_time_ms = (ts_end.tv_sec - ts_start.tv_sec) * 1000.0 +
+                        (ts_end.tv_nsec - ts_start.tv_nsec) / 1000000.0;
+        
+        thread_update_stats(ctrl, cycle_time_ms);
+        
+        /* 50Hz = 20ms周期 */
+        int sleep_us = POWER_READ_PERIOD_MS * 1000 - (int)(cycle_time_ms * 1000);
+        if (sleep_us > 0) {
+            usleep(sleep_us);
+        }
+    }
+    
+    ctrl->state = THREAD_STATE_STOPPED;
+    LOG_INFO(LOG_MODULE_POWER, "Power data thread stopped");
+    
+    return NULL;
+}
+
+/******************************************************************************
+ * 电源板打印线程 - 1Hz打印
+ ******************************************************************************/
+void* power_print_thread(void* arg) {
+    ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
+    uint16_t current, voltage;
+    uint32_t last_read_count = 0;
+    
+    LOG_INFO(LOG_MODULE_POWER, "Power print thread started (1Hz)");
+    
+    ctrl->state = THREAD_STATE_RUNNING;
+    
+    while (!thread_should_exit(ctrl) && g_running) {
+        /* 获取电源板数据 */
+        pthread_mutex_lock(&g_power_data_mutex);
+        current = g_power_current;
+        voltage = g_power_voltage;
+        pthread_mutex_unlock(&g_power_data_mutex);
+        
+        /* 计算读取次数 */
+        uint32_t reads = g_power.read_count - last_read_count;
+        last_read_count = g_power.read_count;
+        
+        /* 打印电源板数据 */
+        LOG_INFO(LOG_MODULE_POWER, 
+            "Voltage=%5.2fV Current=%5.2fA | Reads: %u",
+            voltage / 1000.0f, current / 1000.0f, reads);
+        
+        /* 1Hz = 1000ms周期 */
+        usleep(POWER_PRINT_PERIOD_MS * 1000);
+    }
+    
+    ctrl->state = THREAD_STATE_STOPPED;
+    LOG_INFO(LOG_MODULE_POWER, "Power print thread stopped");
+    
+    return NULL;
+}
+
+/******************************************************************************
+ * 电源板测试线程 - 5秒后设置电流为0.6A
+ ******************************************************************************/
+void* power_test_thread(void* arg) {
+    ThreadCtrl_t *ctrl = (ThreadCtrl_t*)arg;
+    
+    LOG_INFO(LOG_MODULE_POWER, "Power test thread started");
+    LOG_INFO(LOG_MODULE_POWER, "Default current: 0.44A, will change to 0.6A after 5 seconds");
+    
+    ctrl->state = THREAD_STATE_RUNNING;
+    
+    /* 等待5秒 */
+    sleep(5);
+    
+    if (!g_running) {
+        ctrl->state = THREAD_STATE_STOPPED;
+        return NULL;
+    }
+    
+    /* 设置电流为0.6A (600mA) */
+    LOG_INFO(LOG_MODULE_POWER, "Setting current to 0.6A...");
+    if (power_set_current(&g_power, 600) == ERR_OK) {
+        LOG_INFO(LOG_MODULE_POWER, "Current successfully set to 0.6A");
+    } else {
+        LOG_ERROR(LOG_MODULE_POWER, "Failed to set current to 0.6A");
+    }
+    
+    ctrl->state = THREAD_STATE_STOPPED;
     return NULL;
 }
 
@@ -365,8 +484,18 @@ ErrorCode_t system_init(void) {
     }
     LOG_INFO(LOG_MODULE_PRESSURE, "Pressure driver initialized (Addr=%d)", PRESSURE_SLAVE_ADDR);
     
-    /* TODO: 初始化电源板驱动（待实现） */
-    /* power_init(&g_power, POWER_UART_DEVICE, POWER_UART_BAUDRATE); */
+    /* 初始化电源板驱动 */
+    LOG_INFO(LOG_MODULE_POWER, "Initializing power driver...");
+    ret = power_init(&g_power, POWER_UART_DEVICE, POWER_UART_BAUDRATE);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_POWER, "Failed to initialize power driver");
+        pressure_deinit(&g_pressure);
+        encoder_deinit(&g_encoder);
+        rs485_bus_deinit();
+        motor_deinit(&g_motor);
+        return ret;
+    }
+    LOG_INFO(LOG_MODULE_POWER, "Power driver initialized (default 0.44A)");
     
     g_system_state = SYS_STATE_READY;
     LOG_INFO(LOG_MODULE_SYS, "System initialization completed");
@@ -395,6 +524,7 @@ void system_deinit(void) {
     /* 销毁互斥锁 */
     pthread_mutex_destroy(&g_encoder_data_mutex);
     pthread_mutex_destroy(&g_pressure_data_mutex);
+    pthread_mutex_destroy(&g_power_data_mutex);
     
     /* 反初始化线程管理器 */
     thread_mgr_deinit(&g_thread_mgr);
@@ -463,6 +593,48 @@ ErrorCode_t create_system_threads(int motor_enabled) {
     ret = thread_mgr_create(&g_thread_mgr, &config);
     if (ret != ERR_OK) {
         LOG_ERROR(LOG_MODULE_SYS, "Failed to create pressure print thread");
+        return ret;
+    }
+    
+    /* 创建电源板数据采集线程 (50Hz) */
+    config.type = THREAD_TYPE_DATA;
+    config.name = "PowerData";
+    config.priority = THREAD_PRIORITY_NORMAL;
+    config.period_ms = POWER_READ_PERIOD_MS;
+    config.func = power_data_thread;
+    config.arg = NULL;
+    
+    ret = thread_mgr_create(&g_thread_mgr, &config);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create power data thread");
+        return ret;
+    }
+    
+    /* 创建电源板打印线程 (1Hz) */
+    config.type = THREAD_TYPE_LOG;
+    config.name = "PowerPrint";
+    config.priority = THREAD_PRIORITY_LOW;
+    config.period_ms = POWER_PRINT_PERIOD_MS;
+    config.func = power_print_thread;
+    config.arg = NULL;
+    
+    ret = thread_mgr_create(&g_thread_mgr, &config);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create power print thread");
+        return ret;
+    }
+    
+    /* 创建电源板测试线程（5秒后设置0.6A） */
+    config.type = THREAD_TYPE_CONTROL;
+    config.name = "PowerTest";
+    config.priority = THREAD_PRIORITY_NORMAL;
+    config.period_ms = 0;  /* 一次性任务 */
+    config.func = power_test_thread;
+    config.arg = NULL;
+    
+    ret = thread_mgr_create(&g_thread_mgr, &config);
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SYS, "Failed to create power test thread");
         return ret;
     }
     
@@ -535,7 +707,7 @@ int main(int argc, char *argv[]) {
     if (motor_enabled) {
         LOG_INFO(LOG_MODULE_SYS, "System is running with motor control, press Ctrl+C to stop...");
     } else {
-        LOG_INFO(LOG_MODULE_SYS, "System is running (encoder+pressure mode), press Ctrl+C to stop...");
+        LOG_INFO(LOG_MODULE_SYS, "System is running (full sensor mode), press Ctrl+C to stop...");
     }
     
     /* 运行指定时间后自动停止 */
