@@ -15,8 +15,9 @@ CANOpNode_Sys/
 ├── config/                 # 配置层
 │   └── system_config.h     # 系统配置参数
 ├── drivers/                # 驱动层
-│   ├── motor_driver.h/.c   # 电机驱动（CANopen协议）✅
+│   ├── motor_driver.h/.c   # 电机驱动（CANopen协议，自动配置CAN接口）✅
 │   ├── power_driver.h/.c   # 电源板驱动（自定义协议）✅
+│   ├── sensor_manager.h/.c # 统一传感器管理器（编码器+压力传感器）✅
 │   ├── encoder_driver.h/.c # 编码器驱动（Modbus RTU）✅
 │   ├── pressure_driver.h/.c# 压力计驱动（Modbus RTU）✅
 │   └── rs485_bus.h/.c      # RS485总线管理器 ✅
@@ -24,7 +25,10 @@ CANOpNode_Sys/
 │   ├── sine_wave.h/.c      # 正弦波生成算法 ✅
 ├── utils/                  # 工具层
 │   ├── logger.h/.c         # 日志系统 ✅
-│   └── thread_manager.h/.c # 线程管理器 ✅（支持多线程）
+│   └── thread_manager.h/.c # 线程管理器 ✅
+├── share/                  # 数据文件
+│   ├── axis.txt            # 轴数据
+│   └── encoder_rope_data.txt # 编码器绳子长度数据
 ├── main.c                  # 主程序 ✅
 ├── Makefile                # 构建系统 ✅
 └── README.md               # 说明文档
