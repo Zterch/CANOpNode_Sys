@@ -47,7 +47,8 @@ uint16_t crc16_modbus(const uint8_t *pbuf, uint8_t num) {
 /******************************************************************************
  * 串口操作函数
  ******************************************************************************/
-static int serial_open(const char *device, int baudrate) {
+/* 串口操作函数 (非static，供其他模块使用) */
+int serial_open(const char *device, int baudrate) {
     int fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
     if (fd < 0) {
         LOG_ERROR(LOG_MODULE_SYS, "Failed to open %s: %s", device, strerror(errno));
@@ -109,6 +110,58 @@ static int serial_open(const char *device, int baudrate) {
     
     LOG_INFO(LOG_MODULE_SYS, "RS485 bus %s opened at %d baud", device, baudrate);
     return fd;
+}
+
+/* 串口配置函数 (供其他模块使用) */
+int serial_configure(int fd, int baudrate, int data_bits, int stop_bits, char parity) {
+    (void)data_bits;  /* 暂时忽略，默认8位 */
+    (void)stop_bits;  /* 暂时忽略，默认1位 */
+    (void)parity;     /* 暂时忽略，默认无校验 */
+    
+    struct termios tty;
+    memset(&tty, 0, sizeof(tty));
+    
+    if (tcgetattr(fd, &tty) != 0) {
+        return -1;
+    }
+    
+    /* 设置波特率 */
+    speed_t baud = B9600;
+    switch (baudrate) {
+        case 2400:   baud = B2400;   break;
+        case 4800:   baud = B4800;   break;
+        case 9600:   baud = B9600;   break;
+        case 19200:  baud = B19200;  break;
+        case 38400:  baud = B38400;  break;
+        case 57600:  baud = B57600;  break;
+        case 115200: baud = B115200; break;
+        default:     baud = B9600;   break;
+    }
+    
+    cfsetospeed(&tty, baud);
+    cfsetispeed(&tty, baud);
+    
+    /* 8N1 */
+    tty.c_cflag &= ~PARENB;
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CSIZE;
+    tty.c_cflag |= CS8;
+    tty.c_cflag |= CREAD | CLOCAL;
+    
+    /* 原始模式 */
+    tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+    tty.c_oflag &= ~OPOST;
+    
+    /* 最小读取字节数和超时 */
+    tty.c_cc[VMIN] = 0;
+    tty.c_cc[VTIME] = 1;
+    
+    if (tcsetattr(fd, TCSANOW, &tty) != 0) {
+        return -1;
+    }
+    
+    return 0;
 }
 
 static void serial_close(int fd) {

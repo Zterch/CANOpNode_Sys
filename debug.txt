@@ -1,126 +1,158 @@
-zterch@zterch-TM1701:~/VS_Project/Nimo_COp_Prj/CANOpNode_Sys$ sudo ./bin/CANOpNode_Sys -n
-[sudo] zterch 的密码： 
-Motor control disabled (encoder-only mode)
-[2026-04-22 16:51:35]INFO [SYS] [main.c:434] ========================================
-[2026-04-22 16:51:35]INFO [SYS] [main.c:435] System: CANOpNode_Sys v1.0.0
-[2026-04-22 16:51:35]INFO [SYS] [main.c:436] ========================================
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:84] Thread manager initialized (max 16 threads)
-[2026-04-22 16:51:35]INFO [SYS] [main.c:446] Initializing RS485 bus...
-[2026-04-22 16:51:35]INFO [SYS] [rs485_bus.c:110] RS485 bus /dev/ttyUSB1 opened at 115200 baud
-[2026-04-22 16:51:35]INFO [SYS] [rs485_bus.c:144] RS485 bus initialized (device=/dev/ttyUSB1, baud=115200)
-[2026-04-22 16:51:35]INFO [SYS] [main.c:452] RS485 bus initialized
-[2026-04-22 16:51:35]INFO [MOTOR] [main.c:455] Initializing motor driver...
-[2026-04-22 16:51:35]ERROR [MOTOR] [motor_driver.c:74] Failed to get interface index for can0
-[2026-04-22 16:51:35]WARN [MOTOR] [main.c:458] Failed to initialize motor driver (may be OK for encoder-only mode)
-[2026-04-22 16:51:35]INFO [ENCODER] [main.c:465] Initializing encoder driver...
-[2026-04-22 16:51:35]INFO [ENCODER] [encoder_driver.c:52] Encoder driver initialized (addr=2)
-[2026-04-22 16:51:35]INFO [ENCODER] [main.c:473] Encoder driver initialized (Addr=2)
-[2026-04-22 16:51:35]INFO [PRESSURE] [main.c:476] Initializing pressure driver...
-[2026-04-22 16:51:35]INFO [PRESSURE] [pressure_driver.c:117] Pressure driver initialized (addr=1)
-[2026-04-22 16:51:35]INFO [PRESSURE] [pressure_driver.c:193] Decimal places set to 3 successfully
-[2026-04-22 16:51:35]INFO [PRESSURE] [pressure_driver.c:123] Decimal places set to 3
-[2026-04-22 16:51:35]INFO [PRESSURE] [main.c:485] Pressure driver initialized (Addr=1)
-[2026-04-22 16:51:35]INFO [POWER] [main.c:488] Initializing power driver...
-[2026-04-22 16:51:35]INFO [POWER] [power_driver.c:113] Serial port /dev/ttyUSB0 opened at 115200 baud
-[2026-04-22 16:51:35]INFO [POWER] [power_driver.c:275] Power driver initialized (device=/dev/ttyUSB0, baud=115200)
-[2026-04-22 16:51:35]INFO [POWER] [main.c:498] Power driver initialized (default 0.44A)
-[2026-04-22 16:51:35]INFO [SYS] [main.c:501] System initialization completed
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'EncoderData' created (slot 0)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'EncoderData' started
-[2026-04-22 16:51:35]INFO [ENCODER] [main.c:143] Encoder data thread started (50Hz)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'EncoderPrint' started
-[2026-04-22 16:51:35]INFO [ENCODER] [main.c:196] Encoder print thread started (2Hz)
-[2026-04-22 16:51:35]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 0, Success: 0.0%
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'EncoderPrint' created (slot 1)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'PressureData' created (slot 2)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'PressureData' started
-[2026-04-22 16:51:35]INFO [PRESSURE] [main.c:243] Pressure data thread started (50Hz)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'PressurePrint' started
-[2026-04-22 16:51:35]INFO [PRESSURE] [main.c:286] Pressure print thread started (1Hz)
-[2026-04-22 16:51:35]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'PressurePrint' created (slot 3)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'PowerData' created (slot 4)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'PowerData' started
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'PowerPrint' started
-[2026-04-22 16:51:35]INFO [POWER] [main.c:367] Power print thread started (1Hz)
-[2026-04-22 16:51:35]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:35]INFO [POWER] [main.c:318] Power data thread started (50Hz)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'PowerPrint' created (slot 5)
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:167] Thread 'PowerTest' created (slot 6)
-[2026-04-22 16:51:35]INFO [SYS] [main.c:657] All system threads created (motor disabled)
-[2026-04-22 16:51:35]INFO [SYS] [main.c:710] System is running (full sensor mode), press Ctrl+C to stop...
-[2026-04-22 16:51:35]INFO [SYS] [thread_manager.c:43] Thread 'PowerTest' started
-[2026-04-22 16:51:35]INFO [POWER] [main.c:403] Power test thread started
-[2026-04-22 16:51:35]INFO [POWER] [main.c:404] Default current: 0.44A, will change to 0.6A after 5 seconds
-[2026-04-22 16:51:35]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:36]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:36]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:36]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:36]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:37]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:37]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:37]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:37]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:38]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:38]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:38]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:38]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:39]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:39]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:39]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:39]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:40]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:40]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:40]INFO [POWER] [main.c:417] Setting current to 0.6A...
-[2026-04-22 16:51:40]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:40]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:41]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:41]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:41]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:41]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:42]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:42]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:42]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:42]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:43]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:43]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:43]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:43]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:44]INFO [PRESSURE] [main.c:297] Pressure=  0.000 kg
-[2026-04-22 16:51:44]INFO [POWER] [main.c:383] Voltage= 0.00V Current= 0.00A | Reads: 0
-[2026-04-22 16:51:44]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 8, Success: 0.0%
-[2026-04-22 16:51:44]INFO [ENCODER] [main.c:220] Pos=    0 Angle=  0.00° | Reads: 0, Errors: 7, Success: 0.0%
-[2026-04-22 16:51:45]INFO [SYS] [main.c:716] Demo time (10 seconds) completed
-[2026-04-22 16:51:45]INFO [SYS] [main.c:510] Shutting down system...
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:211] Stopping all threads...
-[2026-04-22 16:51:45]INFO [PRESSURE] [main.c:304] Pressure print thread stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'PressurePrint' stopped
-[2026-04-22 16:51:45]INFO [POWER] [main.c:392] Power print thread stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'PowerPrint' stopped
-[2026-04-22 16:51:45]INFO [ENCODER] [main.c:229] Encoder print thread stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'EncoderPrint' stopped
-[2026-04-22 16:51:45]INFO [ENCODER] [main.c:182] Encoder data thread stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'EncoderData' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'EncoderData' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'EncoderPrint' stopped
-[2026-04-22 16:51:45]INFO [POWER] [main.c:354] Power data thread stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'PowerData' stopped
-[2026-04-22 16:51:45]INFO [PRESSURE] [main.c:274] Pressure data thread stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'PressureData' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'PressureData' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'PressurePrint' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'PowerData' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'PowerPrint' stopped
-[2026-04-22 16:51:45]WARN [POWER] [power_driver.c:319] Failed to set current to 600 mA
-[2026-04-22 16:51:45]ERROR [POWER] [main.c:421] Failed to set current to 0.6A
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:53] Thread 'PowerTest' stopped
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:238] Thread 'PowerTest' stopped
-[2026-04-22 16:51:45]INFO [POWER] [power_driver.c:296] Power driver deinitialized
-[2026-04-22 16:51:45]INFO [PRESSURE] [pressure_driver.c:141] Pressure driver deinitialized
-[2026-04-22 16:51:45]INFO [ENCODER] [encoder_driver.c:68] Encoder driver deinitialized
-[2026-04-22 16:51:45]INFO [SYS] [rs485_bus.c:161] RS485 bus deinitialized
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:211] Stopping all threads...
-[2026-04-22 16:51:45]INFO [SYS] [thread_manager.c:103] Thread manager deinitialized
-[2026-04-22 16:51:45]INFO [SYS] [main.c:533] System shutdown completed
+zterch@zterch-TM1701:~/VS_Project/Nimo_COp_Prj/CANOpNode_Sys$ sudo ./bin/CANOpNode_Sys
+Motor control enabled (use -n or --no-motor to disable)
+========================================
+CANOpNode_Sys v1.1.0 (Unified Sensor Manager)
+========================================
 
-System exited normally.
+Step 1: Initializing sensor manager...
+  Device: /dev/ttyUSB2, Baudrate: 115200
+Step 2: Sensor manager initialized
+Step 3: Performing encoder zero calibration...
+Step 4: Encoder zero calibration done
+Step 5: Performing pressure tare...
+Step 6: Pressure tare done
+Step 7: Initializing power driver...
+Step 8: Power driver initialized
+Step 9: Initializing motor driver...
+Step 10: Motor driver initialized (NodeID=1)
+Step 11: Starting sensor manager...
+[MOTOR] Control thread started
+[MOTOR] Enabling motor...
+Step 12: Sensor manager started
+Step 13: Creating print thread...
+Step 14: Creating power test thread...
+[PRINT] Print thread started (1Hz)
+
+========== Sensor Data ==========
+[ENCODER] Data not available: ret=0 valid=0
+[PRESSURE] Data not available: ret=0 valid=0
+
+Step 15: All threads started!
+System running, press Ctrl+C to stop...
+
+[POWER] Test thread started
+[POWER] Will set current to 0.6A after 5 seconds
+[POWER] Voltage=13.77 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+[MOTOR] Motor enabled
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.77 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.81 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.82 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+[MOTOR] Stopping motor...
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.79 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+[MOTOR] Control thread stopped
+[POWER] Setting current to 0.6A...
+[POWER] Current set successfully
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.82 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.79 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.79 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.81 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.79 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.82 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.81 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.84 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
+[POWER] Voltage=13.81 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.81 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.84 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+
+========== Sensor Data ==========
+[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
+[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
+[POWER] Voltage=13.81 V Current= 0.60 A
+[MOTOR] Enabled, NodeID=1
+^C
+Shutting down...
+[PRINT] Print thread stopped
+
+
+=== Sensor Manager Status ===
+Cycle count: 80
+Total errors: 0
+
+Encoder (addr=2):
+  Reads: 80, Errors: 0, Success: 100.0%
+  Multi-turn: 19588
+  Angle: 1721.60 deg
+  Rope: 0.00 mm
+
+Pressure (addr=1):
+  Reads: 80, Errors: 0, Success: 100.0%
+  Pressure: -0.001 kg (raw=-75, offset=-74)
+
+
+System shutdown completed

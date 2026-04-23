@@ -1,0 +1,163 @@
+/******************************************************************************
+ * @file    sensor_manager.h
+ * @brief   统一传感器管理器 - RS485传感器轮询管理
+ * @author  System Architect
+ * @date    2026-04-23
+ * @version 1.0.0
+ * 
+ * 功能说明：
+ * - 统一管理RS485总线上的多个传感器设备
+ * - 通过时间片轮询方式读取设备数据
+ * - 支持Modbus RTU协议，通过地址区分设备
+ * - 50Hz统一更新频率，避免总线竞争
+ ******************************************************************************/
+
+#ifndef SENSOR_MANAGER_H
+#define SENSOR_MANAGER_H
+
+#include <stdint.h>
+#include <pthread.h>
+#include "rs485_bus.h"
+#include "../utils/logger.h"
+
+/******************************************************************************
+ * 宏定义
+ ******************************************************************************/
+
+/* 传感器设备类型 */
+typedef enum {
+    SENSOR_TYPE_ENCODER = 0,    /* 编码器 */
+    SENSOR_TYPE_PRESSURE,       /* 压力传感器 */
+    SENSOR_TYPE_COUNT           /* 传感器类型数量 */
+} SensorType_t;
+
+/* 传感器配置 */
+typedef struct {
+    SensorType_t type;          /* 传感器类型 */
+    uint8_t slave_addr;         /* Modbus设备地址 */
+    uint16_t reg_addr;          /* 寄存器起始地址 */
+    uint16_t reg_count;         /* 寄存器数量 */
+    uint8_t func_code;          /* 功能码 (0x03或0x04) */
+    uint32_t read_timeout_ms;   /* 读取超时时间 */
+    const char* name;           /* 设备名称 */
+} SensorConfig_t;
+
+/* 传感器数据 */
+typedef struct {
+    union {
+        /* 编码器数据 */
+        struct {
+            uint32_t multi_turn_value;      /* 多圈值 */
+            float angle_deg;                /* 角度值 */
+            float rope_length_mm;           /* 绳子长度 */
+        } encoder;
+        
+        /* 压力传感器数据 */
+        struct {
+            float pressure_kg;              /* 压力值 */
+            uint16_t raw_value;             /* 原始值 */
+        } pressure;
+    } data;
+    
+    uint32_t read_count;        /* 成功读取次数 */
+    uint32_t error_count;       /* 错误次数 */
+    uint64_t last_read_us;      /* 上次读取时间 (微秒) */
+    int data_valid;             /* 数据是否有效 */
+} SensorData_t;
+
+/* 传感器管理器 */
+typedef struct {
+    /* 设备配置 */
+    SensorConfig_t configs[SENSOR_TYPE_COUNT];
+    SensorData_t datas[SENSOR_TYPE_COUNT];
+    
+    /* RS485总线 */
+    int rs485_fd;
+    pthread_mutex_t bus_mutex;  /* 总线互斥锁 */
+    
+    /* 运行状态 */
+    int initialized;
+    int running;
+    
+    /* 线程 */
+    pthread_t manager_thread;
+    
+    /* 统计 */
+    uint64_t cycle_count;       /* 轮询周期计数 */
+    uint64_t total_errors;      /* 总错误数 */
+} SensorManager_t;
+
+/******************************************************************************
+ * 公共接口
+ ******************************************************************************/
+
+/**
+ * @brief 初始化传感器管理器
+ * @param manager 管理器实例指针
+ * @param device RS485设备路径
+ * @param baudrate 波特率
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_init(SensorManager_t *manager, const char *device, int baudrate);
+
+/**
+ * @brief 反初始化传感器管理器
+ * @param manager 管理器实例指针
+ */
+void sensor_mgr_deinit(SensorManager_t *manager);
+
+/**
+ * @brief 启动传感器管理线程
+ * @param manager 管理器实例指针
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_start(SensorManager_t *manager);
+
+/**
+ * @brief 停止传感器管理线程
+ * @param manager 管理器实例指针
+ */
+void sensor_mgr_stop(SensorManager_t *manager);
+
+/**
+ * @brief 读取传感器数据（线程安全）
+ * @param manager 管理器实例指针
+ * @param type 传感器类型
+ * @param data 数据输出指针
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_get_data(SensorManager_t *manager, SensorType_t type, SensorData_t *data);
+
+/**
+ * @brief 设置编码器绳子长度参数
+ * @param manager 管理器实例指针
+ * @param drum_diameter 卷筒直径(mm)
+ * @param resolution 编码器分辨率
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_set_encoder_rope_params(SensorManager_t *manager, 
+                                                float drum_diameter, 
+                                                uint32_t resolution);
+
+/**
+ * @brief 执行编码器零点校准
+ * @param manager 管理器实例指针
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_encoder_zero_calibration(SensorManager_t *manager);
+
+/**
+ * @brief 获取传感器读取成功率
+ * @param manager 管理器实例指针
+ * @param type 传感器类型
+ * @return 成功率 (0.0 - 100.0)
+ */
+float sensor_mgr_get_success_rate(SensorManager_t *manager, SensorType_t type);
+
+/**
+ * @brief 打印所有传感器状态（调试用）
+ * @param manager 管理器实例指针
+ */
+void sensor_mgr_print_status(SensorManager_t *manager);
+
+#endif /* SENSOR_MANAGER_H */

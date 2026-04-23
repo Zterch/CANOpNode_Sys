@@ -31,8 +31,7 @@ SOURCES = main.c \
           algorithms/sine_wave.c \
           drivers/motor_driver.c \
           drivers/power_driver.c \
-          drivers/encoder_driver.c \
-          drivers/pressure_driver.c \
+          drivers/sensor_manager.c \
           drivers/rs485_bus.c
 
 # 对象文件
@@ -90,7 +89,21 @@ uninstall:
 	@rm -f /usr/local/bin/CANOpNode_Sys
 	@echo "Uninstalled"
 
-# 运行
+# 测试程序
+test_encoder: dirs
+	$(CC) $(CFLAGS) -c test_encoder_multi_turn.c -o $(BUILD_DIR)/test_encoder_multi_turn.o
+	$(CC) $(BUILD_DIR)/test_encoder_multi_turn.o \
+	      $(BUILD_DIR)/utils/logger.o \
+	      $(BUILD_DIR)/drivers/encoder_driver.o \
+	      $(BUILD_DIR)/drivers/rs485_bus.o \
+	      -o $(BIN_DIR)/test_encoder $(LDFLAGS)
+	@echo "Test program built: $(BIN_DIR)/test_encoder"
+
+# 运行测试
+run_test_encoder: test_encoder
+	@sudo $(BIN_DIR)/test_encoder
+
+# 运行主程序
 run: $(TARGET)
 	@sudo $(TARGET)
 

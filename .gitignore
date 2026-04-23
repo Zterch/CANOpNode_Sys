@@ -1,0 +1,17 @@
+# Build artifacts
+*.o
+*.obj
+*.elf
+
+# Build directories
+build/
+bin/
+
+# Log files
+*.log
+debug.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
