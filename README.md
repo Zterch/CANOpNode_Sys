@@ -37,11 +37,11 @@ CANOpNode_Sys/
 ### 架构特点
 
 1. **分层设计**：清晰的层次结构，便于维护和扩展
-2. **多线程架构**：支持最多16个线程，控制、数据采集、日志分离
-3. **线程安全**：所有共享资源使用互斥锁保护
+2. **统一传感器管理**：单一管理器轮询编码器和压力传感器，减少线程数量，避免RS485总线竞争
+3. **线程安全**：双互斥锁设计（bus_mutex + data_mutex），确保数据安全和实时性
 4. **实时性**：支持Linux实时调度策略
 5. **可配置**：集中式配置管理
-6. **RS485总线管理**：编码器和压力计共用串口，统一管理避免冲突
+6. **自动CAN配置**：电机驱动自动配置CAN接口，无需手动设置
 
 ---
 
@@ -100,16 +100,16 @@ bin/CANOpNode_Sys
 编辑 `config/system_config.h` 确认设备配置：
 
 ```c
-/* 编码器配置（RS485，地址1） */
-#define ENCODER_UART_DEVICE     "/dev/ttyUSB1"
+/* 统一传感器管理器配置（RS485） */
+#define ENCODER_UART_DEVICE     "/dev/ttyUSB2"  /* 编码器+压力传感器共用 */
 #define ENCODER_UART_BAUDRATE   115200
-#define ENCODER_SLAVE_ADDR      1
+
+/* 编码器配置（地址2） */
+#define ENCODER_SLAVE_ADDR      2
 #define ENCODER_RESOLUTION      4096
 
-/* 压力计配置（RS485，地址2） */
-#define PRESSURE_UART_DEVICE    "/dev/ttyUSB1"  /* 与编码器共用 */
-#define PRESSURE_UART_BAUDRATE  115200
-#define PRESSURE_SLAVE_ADDR     2
+/* 压力传感器配置（地址1） */
+#define PRESSURE_SLAVE_ADDR     1
 #define PRESSURE_DECIMAL_PLACES 3               /* 3位小数 */
 
 /* 电源板配置（UART/TTL） */
@@ -119,6 +119,7 @@ bin/CANOpNode_Sys
 /* 电机配置 */
 #define MOTOR_CAN_INTERFACE     "can0"
 #define MOTOR_NODE_ID           1
+#define MOTOR_CAN_BITRATE       1000000         /* 1 Mbps，自动配置 */
 ```
 
 #### 2. 设置设备权限
@@ -232,41 +233,58 @@ make clean && make
 ### 编码器参数配置
 
 ```c
-/* 编码器串口设备 */
-#define ENCODER_UART_DEVICE     "/dev/ttyUSB1"
+/* 编码器串口设备 - 与压力传感器共用 */
+#define ENCODER_UART_DEVICE     "/dev/ttyUSB2"
 
 /* 波特率 */
 #define ENCODER_UART_BAUDRATE   115200
 
 /* Modbus从机地址 */
-#define ENCODER_SLAVE_ADDR      1
+#define ENCODER_SLAVE_ADDR      2
 
 /* 编码器分辨率（4096 = 12位） */
 #define ENCODER_RESOLUTION      4096
 
-/* 读取频率 */
-#define ENCODER_READ_PERIOD_MS  20      /* 50Hz */
-#define ENCODER_PRINT_PERIOD_MS 500     /* 2Hz */
+/* 绳子长度计算参数 */
+#define ROPE_DRUM_DIAMETER      100.0f  /* 卷筒直径(mm) */
 ```
 
-### 压力计参数配置
+### 压力传感器参数配置
 
 ```c
-/* 压力计串口设备（与编码器共用） */
-#define PRESSURE_UART_DEVICE    "/dev/ttyUSB1"
+/* 压力传感器串口设备 - 与编码器共用 */
+#define PRESSURE_UART_DEVICE    "/dev/ttyUSB2"
 
 /* 波特率 */
 #define PRESSURE_UART_BAUDRATE  115200
 
 /* Modbus从机地址 */
-#define PRESSURE_SLAVE_ADDR     2       /* 设备地址2 */
+#define PRESSURE_SLAVE_ADDR     1       /* 设备地址1 */
 
-/* 小数点位数 */
+/* 数据解析 */
 #define PRESSURE_DECIMAL_PLACES 3       /* 3位小数，分辨率0.001kg */
 
-/* 读取频率 */
-#define PRESSURE_READ_PERIOD_MS     20  /* 50Hz */
-#define PRESSURE_PRINT_PERIOD_MS    1000 /* 1Hz */
+/* 去皮功能 */
+// 程序启动时自动执行去皮，保存当前值为零点
+sensor_mgr_pressure_tare(&g_sensor_mgr);
+```
+
+### 统一传感器管理器配置
+
+```c
+/* 统一传感器管理器 - 编码器+压力传感器 */
+#define SENSOR_MANAGER_DEVICE   "/dev/ttyUSB2"
+#define SENSOR_MANAGER_BAUDRATE 115200
+
+/* 编码器配置 */
+#define ENCODER_SLAVE_ADDR      2
+#define ENCODER_REG_ADDR        0x0000  /* 多圈值寄存器 */
+#define ENCODER_REG_COUNT       2       /* 2个寄存器 = 4字节 */
+
+/* 压力传感器配置 */
+#define PRESSURE_SLAVE_ADDR     1
+#define PRESSURE_REG_ADDR       0x0000  /* 压力值寄存器 */
+#define PRESSURE_REG_COUNT      1       /* 1个寄存器 = 2字节 */
 ```
 
 ### 电源板参数配置
@@ -317,18 +335,23 @@ make clean && make
 
 ## 线程架构
 
-系统使用改进的线程管理器，支持最多16个线程：
+系统使用精简的多线程架构：
 
-| 线程名 | 类型 | 优先级 | 周期 | 功能 |
-|--------|------|--------|------|------|
-| EncoderData | DATA | 中(50) | 20ms | 50Hz读取编码器 |
-| EncoderPrint | LOG | 低(20) | 500ms | 2Hz打印编码器数据 |
-| PressureData | DATA | 中(50) | 20ms | 50Hz读取压力计 |
-| PressurePrint | LOG | 低(20) | 1000ms | 1Hz打印压力数据 |
-| PowerData | DATA | 中(50) | 20ms | 50Hz读取电源板 |
-| PowerPrint | LOG | 低(20) | 1000ms | 1Hz打印电源数据 |
-| PowerTest | CONTROL | 中(50) | - | 5秒后设置电流0.6A |
-| Control | CONTROL | 高(80) | 10ms | 电机控制（可选） |
+| 线程名 | 类型 | 周期 | 功能 |
+|--------|------|------|------|
+| SensorManager | DATA | 20ms | 统一传感器管理器（50Hz轮询编码器+压力传感器）|
+| Print | LOG | 1000ms | 1Hz打印所有传感器数据 |
+| PowerTest | CONTROL | - | 5秒后设置电流0.6A |
+| MotorControl | CONTROL | 10ms | 电机正弦波控制（可选）|
+
+### 统一传感器管理器特点
+
+- **单一RS485总线管理**：编码器和压力传感器共用串口，通过时间片轮询（各10ms）
+- **双互斥锁设计**：
+  - `bus_mutex`：保护串口访问
+  - `data_mutex`：保护数据读取
+- **50Hz更新频率**：20ms周期，避免总线竞争
+- **支持去皮功能**：压力传感器自动去皮校准
 
 ---
 
@@ -380,7 +403,18 @@ make clean && make
 
 **解决：** 系统最多支持16个线程，请检查线程配置。
 
-### 问题5：CAN接口错误
+### 问题5：压力传感器数据异常
+
+**现象：**
+```
+[PRESSURE] Pressure= 65.462 kg raw=65462
+```
+
+**原因：** 压力传感器数据为16位有符号整数，直接显示为无符号数导致数值错误。
+
+**解决：** 已修复为正确处理有符号数据，并添加去皮功能。去皮后应显示正确的重量值。
+
+### 问题6：CAN接口错误
 
 **现象：**
 ```
@@ -388,6 +422,8 @@ make clean && make
 ```
 
 **解决：**
+- 程序已自动配置CAN接口，无需手动设置
+- 如需手动配置：
 ```bash
 sudo ip link set can0 type can bitrate 1000000
 sudo ip link set can0 up
@@ -544,13 +580,13 @@ git remote -v
 ### ✅ 已实现
 - 系统架构搭建
 - 日志系统（彩色输出、文件记录）
-- 线程管理器（支持16个线程、优先级、统计）
+- **统一传感器管理器（编码器+压力传感器，单一管理器轮询）**
 - 正弦波算法
-- **电机驱动（完整CANopen实现）**
-- **编码器驱动（Modbus RTU，50Hz读取，2Hz打印）**
-- **压力计驱动（Modbus RTU，50Hz读取，1Hz打印，3位小数）**
-- **电源板驱动（自定义协议，50Hz读取，1Hz打印）**
-- **RS485总线管理器（编码器+压力计共用）**
+- **电机驱动（完整CANopen实现，自动配置CAN接口）**
+- **编码器驱动（Modbus RTU，多圈值读取，绳子长度计算）**
+- **压力传感器驱动（Modbus RTU，有符号数据解析，去皮功能）**
+- **电源板驱动（自定义协议，50Hz读取）**
+- **RS485总线管理器（编码器+压力传感器共用）**
 - 多线程控制框架
 - 构建系统
 

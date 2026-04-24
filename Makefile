@@ -29,6 +29,11 @@ SOURCES = main.c \
           utils/logger.c \
           utils/thread_manager.c \
           algorithms/sine_wave.c \
+          algorithms/signal_filter.c \
+          algorithms/pid_controller.c \
+          algorithms/safety_monitor.c \
+          algorithms/gravity_unload.c \
+          algorithms/system_check.c \
           drivers/motor_driver.c \
           drivers/power_driver.c \
           drivers/sensor_manager.c \

@@ -42,6 +42,9 @@ static float s_rope_length_base = 0.0f;         /* 基准长度(mm) */
 static uint32_t s_encoder_resolution = 4096;    /* 编码器分辨率 */
 static uint32_t s_encoder_zero_offset = 0;      /* 零点偏移 */
 
+/* 压力传感器参数 */
+static int16_t s_pressure_zero_offset = 0;      /* 压力传感器去皮偏移 */
+
 /******************************************************************************
  * 辅助函数
  ******************************************************************************/
@@ -481,6 +484,32 @@ ErrorCode_t sensor_mgr_encoder_zero_calibration(SensorManager_t *manager) {
     s_encoder_zero_offset = data.data.encoder.multi_turn_value;
     
     LOG_INFO(LOG_MODULE_SENSOR, "Zero calibration done: offset=%u", s_encoder_zero_offset);
+    
+    return ERR_OK;
+}
+
+ErrorCode_t sensor_mgr_pressure_tare(SensorManager_t *manager) {
+    if (manager == NULL || !manager->initialized) {
+        return ERR_INVALID_PARAM;
+    }
+    
+    /* 读取当前压力值作为去皮基准 */
+    SensorData_t data;
+    
+    pthread_mutex_lock(&manager->bus_mutex);
+    ErrorCode_t ret = read_pressure(manager, &data);
+    pthread_mutex_unlock(&manager->bus_mutex);
+    
+    if (ret != ERR_OK) {
+        LOG_ERROR(LOG_MODULE_SENSOR, "Pressure tare failed: cannot read sensor");
+        return ret;
+    }
+    
+    /* 保存当前有符号原始值作为去皮偏移 */
+    int16_t raw_s16 = (int16_t)data.data.pressure.raw_value;
+    s_pressure_zero_offset = raw_s16;
+    
+    LOG_INFO(LOG_MODULE_SENSOR, "Pressure tare done: offset=%d", s_pressure_zero_offset);
     
     return ERR_OK;
 }

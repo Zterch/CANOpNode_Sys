@@ -147,6 +147,13 @@ ErrorCode_t sensor_mgr_set_encoder_rope_params(SensorManager_t *manager,
 ErrorCode_t sensor_mgr_encoder_zero_calibration(SensorManager_t *manager);
 
 /**
+ * @brief 执行压力传感器去皮/清零
+ * @param manager 管理器实例指针
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_pressure_tare(SensorManager_t *manager);
+
+/**
  * @brief 获取传感器读取成功率
  * @param manager 管理器实例指针
  * @param type 传感器类型
