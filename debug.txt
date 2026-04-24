@@ -1,158 +1,113 @@
-zterch@zterch-TM1701:~/VS_Project/Nimo_COp_Prj/CANOpNode_Sys$ sudo ./bin/CANOpNode_Sys
-Motor control enabled (use -n or --no-motor to disable)
-========================================
-CANOpNode_Sys v1.1.0 (Unified Sensor Manager)
-========================================
+Statistics:
+  Pressure: -0.20 to 3.90 kg
+  Max velocity: 0.672 m/s
 
-Step 1: Initializing sensor manager...
-  Device: /dev/ttyUSB2, Baudrate: 115200
-Step 2: Sensor manager initialized
-Step 3: Performing encoder zero calibration...
-Step 4: Encoder zero calibration done
-Step 5: Performing pressure tare...
-Step 6: Pressure tare done
-Step 7: Initializing power driver...
-Step 8: Power driver initialized
-Step 9: Initializing motor driver...
-Step 10: Motor driver initialized (NodeID=1)
-Step 11: Starting sensor manager...
-[MOTOR] Control thread started
-[MOTOR] Enabling motor...
-Step 12: Sensor manager started
-Step 13: Creating print thread...
-Step 14: Creating power test thread...
-[PRINT] Print thread started (1Hz)
+Safety Status: OK
+  Message: OK
+==========================================
+[DATA] P=-0.100kg Pos=0.400m V_raw=0.000 V_filt=0.000 I_clutch=41.4mA V_motor=67
 
-========== Sensor Data ==========
-[ENCODER] Data not available: ret=0 valid=0
-[PRESSURE] Data not available: ret=0 valid=0
+========== Gravity Unload Status ==========
+State: 3, Error: 0
+Cycle count: 4353
+Running time: 89.0 s
+Emergency stop: NO
 
-Step 15: All threads started!
-System running, press Ctrl+C to stop...
+Statistics:
+  Pressure: -0.20 to 3.90 kg
+  Max velocity: 0.672 m/s
 
-[POWER] Test thread started
-[POWER] Will set current to 0.6A after 5 seconds
-[POWER] Voltage=13.77 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-[MOTOR] Motor enabled
+Safety Status: OK
+  Message: OK
+==========================================
+[DATA] P=-0.200kg Pos=0.400m V_raw=0.000 V_filt=0.000 I_clutch=32.7mA V_motor=66
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.77 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+========== Gravity Unload Status ==========
+State: 3, Error: 0
+Cycle count: 4403
+Running time: 90.0 s
+Emergency stop: NO
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.81 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Statistics:
+  Pressure: -0.20 to 3.90 kg
+  Max velocity: 0.672 m/s
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.82 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-[MOTOR] Stopping motor...
+Safety Status: OK
+  Message: OK
+==========================================
+[DATA] P=-0.200kg Pos=0.400m V_raw=0.000 V_filt=0.000 I_clutch=32.7mA V_motor=66
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.79 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-[MOTOR] Control thread stopped
-[POWER] Setting current to 0.6A...
-[POWER] Current set successfully
+========== Gravity Unload Status ==========
+State: 3, Error: 0
+Cycle count: 4452
+Running time: 91.0 s
+Emergency stop: NO
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.82 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Statistics:
+  Pressure: -0.20 to 3.90 kg
+  Max velocity: 0.672 m/s
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.79 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Safety Status: OK
+  Message: OK
+==========================================
+[DATA] P=-0.100kg Pos=0.400m V_raw=0.000 V_filt=0.000 I_clutch=41.4mA V_motor=67
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.79 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+========== Gravity Unload Status ==========
+State: 3, Error: 0
+Cycle count: 4501
+Running time: 92.0 s
+Emergency stop: NO
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.81 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Statistics:
+  Pressure: -0.20 to 3.90 kg
+  Max velocity: 0.672 m/s
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.79 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Safety Status: OK
+  Message: OK
+==========================================
+[DATA] P=-0.100kg Pos=0.400m V_raw=0.000 V_filt=0.000 I_clutch=41.4mA V_motor=67
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.82 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+========== Gravity Unload Status ==========
+State: 3, Error: 0
+Cycle count: 4549
+Running time: 93.0 s
+Emergency stop: NO
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.81 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Statistics:
+  Pressure: -0.20 to 3.90 kg
+  Max velocity: 0.672 m/s
 
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.84 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure=  0.000 kg raw=-74 (offset=-74)
-[POWER] Voltage=13.81 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.81 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.84 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
-
-========== Sensor Data ==========
-[ENCODER] MultiTurn= 19588 Turns=  4.78 Angle=  1721.60 deg Rope=    0.00 mm
-[PRESSURE] Pressure= -0.001 kg raw=-75 (offset=-74)
-[POWER] Voltage=13.81 V Current= 0.60 A
-[MOTOR] Enabled, NodeID=1
+Safety Status: OK
+  Message: OK
+==========================================
+[DATA] P=-0.100kg Pos=0.400m V_raw=0.000 V_filt=0.000 I_clutch=41.4mA V_motor=67
 ^C
-Shutting down...
-[PRINT] Print thread stopped
+[INFO] Signal received, shutting down...
+[SENSOR] Saved encoder data: base=0.00mm, offset=23492
+[SENSOR] Saved pressure zero offset: 1
+
+[SHUTDOWN] Stopping system...
+  -> Stopping algorithm... [GRAVITY_UNLOAD] Thread stopped
+[GRAVITY_UNLOAD] Control thread stopped
+[GRAVITY_UNLOAD] Controller deinitialized
+OK
+  -> Stopping sensor manager... OK
+[MONITOR] Monitor thread stopped
 
 
 === Sensor Manager Status ===
-Cycle count: 80
-Total errors: 0
+Cycle count: 5182
+Total errors: 9
 
 Encoder (addr=2):
-  Reads: 80, Errors: 0, Success: 100.0%
-  Multi-turn: 19588
-  Angle: 1721.60 deg
-  Rope: 0.00 mm
+  Reads: 5182, Errors: 0, Success: 100.0%
+  Multi-turn: 28710
+  Angle: 2523.34 deg
+  Rope: 400.22 mm
 
 Pressure (addr=1):
-  Reads: 80, Errors: 0, Success: 100.0%
-  Pressure: -0.001 kg (raw=-75, offset=-74)
+  Reads: 5173, Errors: 9, Success: 99.8%
+  Pressure: 0.100 kg (raw=2, offset=1)
 
 
-System shutdown completed
+[System shutdown completed]

@@ -9,6 +9,7 @@
 #include "motor_driver.h"
 #include "../utils/logger.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <net/if.h>
@@ -47,6 +48,7 @@
 /******************************************************************************
  * 内部函数声明
  ******************************************************************************/
+static int can_interface_configure(const char *interface, int bitrate);
 static int can_socket_init(const char *interface);
 static int can_send_frame(int sock, uint32_t can_id, uint8_t *data, uint8_t dlc);
 static int can_receive_frame(int sock, uint32_t *can_id, uint8_t *data, uint8_t *dlc, int timeout_ms);
@@ -57,6 +59,39 @@ static int nmt_send(MotorDriver_t *motor, uint8_t command);
 /******************************************************************************
  * 函数实现
  ******************************************************************************/
+
+static int can_interface_configure(const char *interface, int bitrate) {
+    char cmd[256];
+    int ret;
+    
+    /* 先关闭接口 */
+    snprintf(cmd, sizeof(cmd), "ip link set %s down 2>/dev/null", interface);
+    system(cmd);
+    usleep(100000);
+    
+    /* 设置波特率并启动接口 */
+    snprintf(cmd, sizeof(cmd), "ip link set %s up type can bitrate %d 2>&1", interface, bitrate);
+    ret = system(cmd);
+    if (ret != 0) {
+        LOG_ERROR(LOG_MODULE_MOTOR, "Failed to configure CAN interface %s with bitrate %d", interface, bitrate);
+        return -1;
+    }
+    
+    usleep(100000);
+    
+    /* 启动接口 */
+    snprintf(cmd, sizeof(cmd), "ip link set %s up 2>&1", interface);
+    ret = system(cmd);
+    if (ret != 0) {
+        LOG_ERROR(LOG_MODULE_MOTOR, "Failed to bring up CAN interface %s", interface);
+        return -1;
+    }
+    
+    usleep(50000);
+    
+    LOG_INFO(LOG_MODULE_MOTOR, "CAN interface %s configured with bitrate %d bps", interface, bitrate);
+    return 0;
+}
 
 static int can_socket_init(const char *interface) {
     int sock;
@@ -145,8 +180,8 @@ static int sdo_read(MotorDriver_t *motor, uint16_t index, uint8_t subindex, uint
         return -1;
     }
     
-    for (int i = 0; i < 100; i++) {
-        if (can_receive_frame(motor->socket_fd, &rx_id, rx_data, &rx_dlc, 100) == 0) {
+    for (int i = 0; i < 20; i++) {
+        if (can_receive_frame(motor->socket_fd, &rx_id, rx_data, &rx_dlc, 50) == 0) {
             if (rx_id == (COB_ID_SDO_TX_BASE + motor->node_id)) {
                 if ((rx_data[0] & 0xE0) == 0x80) {
                     return -1;
@@ -186,14 +221,13 @@ static int sdo_write(MotorDriver_t *motor, uint16_t index, uint8_t subindex, uin
         return -1;
     }
     
-    for (int i = 0; i < 100; i++) {
-        if (can_receive_frame(motor->socket_fd, &rx_id, rx_data, &rx_dlc, 100) == 0) {
+    for (int i = 0; i < 20; i++) {
+        if (can_receive_frame(motor->socket_fd, &rx_id, rx_data, &rx_dlc, 50) == 0) {
             if (rx_id == (COB_ID_SDO_TX_BASE + motor->node_id)) {
-                if ((rx_data[0] & 0xE0) == 0x60) {
-                    return 0;
-                } else if ((rx_data[0] & 0xE0) == 0x80) {
+                if ((rx_data[0] & 0xE0) == 0x80) {
                     return -1;
                 }
+                return 0;
             }
         }
     }
@@ -228,6 +262,12 @@ ErrorCode_t motor_init(MotorDriver_t *motor, uint8_t node_id, const char *can_if
     
     if (pthread_mutex_init(&motor->mutex, NULL) != 0) {
         return ERR_GENERAL;
+    }
+
+    /* 配置CAN接口 */
+    if (can_interface_configure(can_if, MOTOR_CAN_BITRATE) < 0) {
+        pthread_mutex_destroy(&motor->mutex);
+        return ERR_COMM_FAIL;
     }
 
     motor->socket_fd = can_socket_init(can_if);

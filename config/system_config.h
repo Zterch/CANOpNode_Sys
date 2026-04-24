@@ -60,7 +60,7 @@ extern "C" {
 /******************************************************************************
  * 编码器配置 (RS485)
  ******************************************************************************/
-#define ENCODER_UART_DEVICE     "/dev/ttyUSB2"  /* USB转RS485设备 - 编码器 */
+#define ENCODER_UART_DEVICE     "/dev/ttyUSB1"  /* USB转RS485设备 - 编码器 */
 #define ENCODER_UART_BAUDRATE   115200
 #define ENCODER_UART_DATA_BITS  8
 #define ENCODER_UART_STOP_BITS  1
@@ -79,7 +79,7 @@ extern "C" {
 #define ENCODER_DEBUG_RAW_DATA      0       /* 打印原始Modbus数据帧用于调试 */
 
 /* 压力计配置 (RS485) */
-#define PRESSURE_UART_DEVICE    "/dev/ttyUSB2"  /* 与编码器共用USB转485 */
+#define PRESSURE_UART_DEVICE    "/dev/ttyUSB1"  /* 与编码器共用USB转485 */
 #define PRESSURE_UART_BAUDRATE  115200
 #define PRESSURE_UART_DATA_BITS 8
 #define PRESSURE_UART_STOP_BITS 1

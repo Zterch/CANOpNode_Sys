@@ -54,8 +54,9 @@ typedef struct {
         
         /* 压力传感器数据 */
         struct {
-            float pressure_kg;              /* 压力值 */
-            uint16_t raw_value;             /* 原始值 */
+            float pressure_kg;              /* 压力值 (kg) */
+            int16_t raw_value;              /* 原始有符号值 */
+            int16_t zero_offset;            /* 去皮偏移值 */
         } pressure;
     } data;
     
@@ -152,6 +153,14 @@ ErrorCode_t sensor_mgr_encoder_zero_calibration(SensorManager_t *manager);
  * @return ErrorCode_t
  */
 ErrorCode_t sensor_mgr_pressure_tare(SensorManager_t *manager);
+
+/**
+ * @brief 设置编码器基准长度
+ * @param manager 管理器实例指针
+ * @param base_length_mm 基准长度(mm)
+ * @return ErrorCode_t
+ */
+ErrorCode_t sensor_mgr_set_encoder_base_length(SensorManager_t *manager, float base_length_mm);
 
 /**
  * @brief 获取传感器读取成功率

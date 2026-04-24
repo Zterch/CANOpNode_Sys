@@ -113,6 +113,10 @@ void signal_handler(int sig) {
     (void)sig;
     printf("\n[INFO] Signal received, shutting down...\n");
     g_running = 0;
+    
+    /* 确保保存编码器数据 */
+    sensor_mgr_deinit(&g_sensor_mgr);
+    power_deinit(&g_power);
 }
 
 /******************************************************************************
@@ -120,6 +124,9 @@ void signal_handler(int sig) {
  ******************************************************************************/
 static int check_sensors_impl(void) {
     SensorData_t encoder, pressure;
+    
+    printf("[CHECK] Checking sensors...\n");
+    fflush(stdout);
     
     /* 检查编码器 */
     if (sensor_mgr_get_data(&g_sensor_mgr, SENSOR_TYPE_ENCODER, &encoder) != ERR_OK) {
@@ -158,12 +165,27 @@ static int check_motor_impl(void) {
         return -1;
     }
     
-    /* 尝试读取电机状态 */
-    if (motor_update_state(&g_motor) != ERR_OK) {
-        printf("[CHECK FAIL] Cannot communicate with motor\n");
+    /* 尝试读取电机状态 - 带超时 */
+    printf("[CHECK] Checking motor communication... ");
+    fflush(stdout);
+    
+    int retries = 3;
+    int motor_ok = 0;
+    while (retries-- > 0) {
+        if (motor_update_state(&g_motor) == ERR_OK) {
+            motor_ok = 1;
+            break;
+        }
+        usleep(100000); /* 100ms */
+    }
+    
+    if (!motor_ok) {
+        printf("FAILED\n");
+        printf("[CHECK FAIL] Cannot communicate with motor after retries\n");
         return -1;
     }
     
+    printf("OK\n");
     printf("[CHECK PASS] Motor OK (NodeID=%d)\n", g_motor.node_id);
     return 0;
 }
@@ -204,6 +226,12 @@ static int check_safety_impl(void) {
  * 用户确认函数
  ******************************************************************************/
 static int request_user_confirmation_impl(void) {
+    /* 检查是否收到停止信号 */
+    if (!g_running) {
+        printf("[INFO] System shutdown requested, skipping confirmation\n");
+        return 0;
+    }
+    
     printf("\n");
     printf("╔══════════════════════════════════════════════════════════════╗\n");
     printf("║                                                              ║\n");
@@ -228,6 +256,12 @@ static int request_user_confirmation_impl(void) {
     
     char input[16];
     if (fgets(input, sizeof(input), stdin) == NULL) {
+        return 0;
+    }
+    
+    /* 检查是否收到停止信号 */
+    if (!g_running) {
+        printf("[INFO] System shutdown requested during confirmation\n");
         return 0;
     }
     
@@ -307,7 +341,29 @@ int main(int argc, char *argv[]) {
     printf("  -> Calibrating sensors... ");
     fflush(stdout);
     sensor_mgr_encoder_zero_calibration(&g_sensor_mgr);
+    // 延迟一段时间让传感器稳定
+    usleep(1000000); // 1秒
     sensor_mgr_pressure_tare(&g_sensor_mgr);
+    
+    /* 询问用户是否设置基准长度 */
+    printf("\n  -> Do you want to set encoder base length? (yes/no): ");
+    fflush(stdout);
+    char input[16];
+    if (fgets(input, sizeof(input), stdin) != NULL) {
+        input[strcspn(input, "\n")] = 0;
+        if (strcmp(input, "yes") == 0 || strcmp(input, "YES") == 0) {
+            printf("  -> Enter base length (mm): ");
+            fflush(stdout);
+            float base_length;
+            if (scanf("%f", &base_length) == 1) {
+                sensor_mgr_set_encoder_base_length(&g_sensor_mgr, base_length);
+                while (getchar() != '\n'); // 清空输入缓冲区
+            } else {
+                while (getchar() != '\n'); // 清空输入缓冲区
+            }
+        }
+    }
+    
     printf("OK\n");
     
     /* 2. 初始化电源板 */
@@ -329,6 +385,15 @@ int main(int argc, char *argv[]) {
             g_motor_enabled = 0;
         } else {
             printf("OK\n");
+            /* 启用电机 */
+            printf("  -> Enabling motor... ");
+            fflush(stdout);
+            if (motor_enable(&g_motor) != ERR_OK) {
+                printf("WARNING (non-critical)\n");
+                g_motor_enabled = 0;
+            } else {
+                printf("OK\n");
+            }
         }
     }
     

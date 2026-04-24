@@ -49,15 +49,15 @@ uint16_t crc16_modbus(const uint8_t *pbuf, uint8_t num) {
  ******************************************************************************/
 /* 串口操作函数 (非static，供其他模块使用) */
 int serial_open(const char *device, int baudrate) {
-    int fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+    int fd = open(device, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd < 0) {
         LOG_ERROR(LOG_MODULE_SYS, "Failed to open %s: %s", device, strerror(errno));
         return -1;
     }
     
-    /* 清除非阻塞标志 */
+    /* 保持非阻塞模式 */
     int flags = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     
     struct termios tty;
     memset(&tty, 0, sizeof(tty));

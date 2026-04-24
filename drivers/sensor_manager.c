@@ -45,6 +45,10 @@ static uint32_t s_encoder_zero_offset = 0;      /* 零点偏移 */
 /* 压力传感器参数 */
 static int16_t s_pressure_zero_offset = 0;      /* 压力传感器去皮偏移 */
 
+/* 数据文件路径 */
+#define ENCODER_DATA_FILE   "share/encoder_rope_data.txt"
+#define PRESSURE_DATA_FILE  "share/pressure_zero.txt"
+
 /******************************************************************************
  * 辅助函数
  ******************************************************************************/
@@ -54,6 +58,130 @@ static uint64_t get_time_us(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000ULL + (uint64_t)ts.tv_nsec / 1000ULL;
+}
+
+/******************************************************************************
+ * 数据文件加载/保存
+ ******************************************************************************/
+
+/* 加载编码器绳长数据 */
+static int load_encoder_data(void) {
+    FILE *fp = fopen(ENCODER_DATA_FILE, "r");
+    if (fp == NULL) {
+        printf("[SENSOR] No encoder data file found, using defaults\n");
+        return -1;
+    }
+    
+    char line[128];
+    while (fgets(line, sizeof(line), fp)) {
+        /* 跳过注释行 */
+        if (line[0] == '#') continue;
+        
+        /* 解析 BASE_LENGTH_MM */
+        if (strncmp(line, "BASE_LENGTH_MM=", 15) == 0) {
+            sscanf(line + 15, "%f", &s_rope_length_base);
+        }
+        /* 解析 ZERO_OFFSET */
+        else if (strncmp(line, "ZERO_OFFSET=", 12) == 0) {
+            sscanf(line + 12, "%u", &s_encoder_zero_offset);
+        }
+        /* 解析 DRUM_DIAMETER */
+        else if (strncmp(line, "DRUM_DIAMETER=", 14) == 0) {
+            sscanf(line + 14, "%f", &s_rope_drum_diameter);
+        }
+        /* 解析 ENCODER_RESOLUTION */
+        else if (strncmp(line, "ENCODER_RESOLUTION=", 19) == 0) {
+            sscanf(line + 19, "%u", &s_encoder_resolution);
+        }
+    }
+    
+    fclose(fp);
+    
+    /* 重新计算每圈绳长 */
+    s_rope_length_per_turn = M_PI * s_rope_drum_diameter;
+    
+    printf("[SENSOR] Loaded encoder data: base=%.2fmm, offset=%u, drum=%.2fmm, res=%u\n",
+           s_rope_length_base, s_encoder_zero_offset, s_rope_drum_diameter, s_encoder_resolution);
+    
+    return 0;
+}
+
+/* 保存编码器绳长数据 */
+static int save_encoder_data(void) {
+    FILE *fp = fopen(ENCODER_DATA_FILE, "w");
+    if (fp == NULL) {
+        printf("[SENSOR] Failed to save encoder data\n");
+        return -1;
+    }
+    
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char time_str[32];
+    strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
+    
+    fprintf(fp, "# Encoder Rope Length Data\n");
+    fprintf(fp, "# Saved at: %s\n", time_str);
+    fprintf(fp, "BASE_LENGTH_MM=%.4f\n", s_rope_length_base);
+    fprintf(fp, "ZERO_OFFSET=%u\n", s_encoder_zero_offset);
+    fprintf(fp, "DRUM_DIAMETER=%.4f\n", s_rope_drum_diameter);
+    fprintf(fp, "ENCODER_RESOLUTION=%u\n", s_encoder_resolution);
+    
+    fclose(fp);
+    
+    printf("[SENSOR] Saved encoder data: base=%.2fmm, offset=%u\n",
+           s_rope_length_base, s_encoder_zero_offset);
+    
+    return 0;
+}
+
+/* 加载压力传感器去皮数据 */
+static int load_pressure_data(void) {
+    FILE *fp = fopen(PRESSURE_DATA_FILE, "r");
+    if (fp == NULL) {
+        printf("[SENSOR] No pressure data file found, using zero offset\n");
+        return -1;
+    }
+    
+    char line[128];
+    while (fgets(line, sizeof(line), fp)) {
+        if (line[0] == '#') continue;
+        
+        if (strncmp(line, "ZERO_OFFSET=", 12) == 0) {
+            int temp;
+            sscanf(line + 12, "%d", &temp);
+            s_pressure_zero_offset = (int16_t)temp;
+        }
+    }
+    
+    fclose(fp);
+    
+    printf("[SENSOR] Loaded pressure zero offset: %d\n", s_pressure_zero_offset);
+    
+    return 0;
+}
+
+/* 保存压力传感器去皮数据 */
+static int save_pressure_data(void) {
+    FILE *fp = fopen(PRESSURE_DATA_FILE, "w");
+    if (fp == NULL) {
+        printf("[SENSOR] Failed to save pressure data\n");
+        return -1;
+    }
+    
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char time_str[32];
+    strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
+    
+    fprintf(fp, "# Pressure Sensor Zero Data\n");
+    fprintf(fp, "# Saved at: %s\n", time_str);
+    fprintf(fp, "ZERO_OFFSET=%d\n", s_pressure_zero_offset);
+    
+    fclose(fp);
+    
+    printf("[SENSOR] Saved pressure zero offset: %d\n", s_pressure_zero_offset);
+    
+    return 0;
 }
 
 /* 计算Modbus CRC16 */
@@ -240,14 +368,18 @@ static ErrorCode_t read_pressure(SensorManager_t *manager, SensorData_t *data) {
         return ret;
     }
     
-    /* 解析16位压力值 (大端模式) */
+    /* 解析16位压力值 (大端模式) - 数据为有符号整型 */
     if (rx_buf[2] == 2) {
-        uint16_t raw_value = ((uint16_t)rx_buf[3] << 8) | (uint16_t)rx_buf[4];
+        /* 先读取为无符号，再转换为有符号 */
+        uint16_t raw_u16 = ((uint16_t)rx_buf[3] << 8) | (uint16_t)rx_buf[4];
+        int16_t raw_s16 = (int16_t)raw_u16;  /* 关键：转换为有符号 */
         
-        data->data.pressure.raw_value = raw_value;
+        data->data.pressure.raw_value = raw_s16;
+        data->data.pressure.zero_offset = s_pressure_zero_offset;
         
-        /* 转换为kg (3位小数) */
-        data->data.pressure.pressure_kg = (float)raw_value / 1000.0f;
+        /* 应用去皮并转换为kg (3位小数) */
+        int16_t adjusted = raw_s16 - s_pressure_zero_offset;
+        data->data.pressure.pressure_kg = (float)adjusted / 10.0f;
         
         data->data_valid = 1;
         data->last_read_us = get_time_us();
@@ -361,6 +493,10 @@ ErrorCode_t sensor_mgr_init(SensorManager_t *manager, const char *device, int ba
     
     manager->initialized = 1;
     
+    /* 加载保存的数据 */
+    load_encoder_data();
+    load_pressure_data();
+    
     LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager initialized");
     LOG_INFO(LOG_MODULE_SENSOR, "  Encoder: addr=%d, reg=0x%04X",
              manager->configs[SENSOR_TYPE_ENCODER].slave_addr,
@@ -379,6 +515,10 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
     
     /* 停止线程 */
     sensor_mgr_stop(manager);
+    
+    /* 保存数据 */
+    save_encoder_data();
+    save_pressure_data();
     
     /* 关闭串口 */
     if (manager->rs485_fd >= 0) {
@@ -493,23 +633,49 @@ ErrorCode_t sensor_mgr_pressure_tare(SensorManager_t *manager) {
         return ERR_INVALID_PARAM;
     }
     
-    /* 读取当前压力值作为去皮基准 */
-    SensorData_t data;
+    /* 多次读取取平均值，提高去皮精度 */
+    int16_t sum = 0;
+    int valid_reads = 0;
     
-    pthread_mutex_lock(&manager->bus_mutex);
-    ErrorCode_t ret = read_pressure(manager, &data);
-    pthread_mutex_unlock(&manager->bus_mutex);
-    
-    if (ret != ERR_OK) {
-        LOG_ERROR(LOG_MODULE_SENSOR, "Pressure tare failed: cannot read sensor");
-        return ret;
+    for (int i = 0; i < 5; i++) {
+        SensorData_t data;
+        pthread_mutex_lock(&manager->bus_mutex);
+        ErrorCode_t ret = read_pressure(manager, &data);
+        pthread_mutex_unlock(&manager->bus_mutex);
+        
+        if (ret == ERR_OK && data.data_valid) {
+            sum += data.data.pressure.raw_value;
+            valid_reads++;
+        }
+        usleep(100000); /* 100ms间隔 */
     }
     
-    /* 保存当前有符号原始值作为去皮偏移 */
-    int16_t raw_s16 = (int16_t)data.data.pressure.raw_value;
-    s_pressure_zero_offset = raw_s16;
+    if (valid_reads < 3) {
+        LOG_ERROR(LOG_MODULE_SENSOR, "Pressure tare failed: not enough valid readings");
+        return ERR_COMM_FAIL;
+    }
     
-    LOG_INFO(LOG_MODULE_SENSOR, "Pressure tare done: offset=%d", s_pressure_zero_offset);
+    /* 计算平均原始值作为去皮偏移 */
+    s_pressure_zero_offset = sum / valid_reads;
+    
+    LOG_INFO(LOG_MODULE_SENSOR, "Pressure tare done: offset=%d, based on %d readings", 
+             s_pressure_zero_offset, valid_reads);
+    
+    /* 立即保存去皮值到文件 */
+    save_pressure_data();
+    
+    return ERR_OK;
+}
+
+ErrorCode_t sensor_mgr_set_encoder_base_length(SensorManager_t *manager, float base_length_mm) {
+    if (manager == NULL || !manager->initialized) {
+        return ERR_INVALID_PARAM;
+    }
+    
+    s_rope_length_base = base_length_mm;
+    save_encoder_data();  /* 立即保存到文件 */
+    
+    LOG_INFO(LOG_MODULE_SENSOR, "Encoder base length set to %.2fmm", base_length_mm);
     
     return ERR_OK;
 }
@@ -552,7 +718,10 @@ void sensor_mgr_print_status(SensorManager_t *manager) {
                 printf("  Angle: %.2f deg\n", data->data.encoder.angle_deg);
                 printf("  Rope: %.2f mm\n", data->data.encoder.rope_length_mm);
             } else if (i == SENSOR_TYPE_PRESSURE) {
-                printf("  Pressure: %.3f kg\n", data->data.pressure.pressure_kg);
+                printf("  Pressure: %.3f kg (raw=%d, offset=%d)\n", 
+                       data->data.pressure.pressure_kg,
+                       data->data.pressure.raw_value,
+                       data->data.pressure.zero_offset);
             }
         }
     }

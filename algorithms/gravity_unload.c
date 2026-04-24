@@ -45,10 +45,12 @@ int gravity_unload_init(GravityUnloadController_t *ctrl) {
     ctrl->clutch_current_per_torque = CLUTCH_CURRENT_PER_TORQUE_MA_NM;
     ctrl->motor_speed_compensation = MOTOR_SPEED_COMPENSATION_C;
     
-    /* 初始化滤波器 */
+    /* 初始化滤波器 - 仅速度需要滤波 */
     ma_filter_init(&ctrl->velocity_filter);
+    /* 压力和位置使用原始值，不需要额外滤波
     lpf_init(&ctrl->pressure_filter, PRESSURE_FILTER_ALPHA);
     diff_init(&ctrl->pressure_diff, 0.5f);
+    */
     diff_init(&ctrl->position_diff, 0.5f);
     
     /* 初始化PID控制器 */
@@ -228,18 +230,20 @@ static void process_sensor_data(GravityUnloadController_t *ctrl,
                                 SensorDataFiltered_t *filtered) {
     if (ctrl == NULL || raw == NULL || filtered == NULL) return;
     
-    /* 压力低通滤波 */
-    filtered->pressure_kg = lpf_update(&ctrl->pressure_filter, raw->pressure_kg);
+    /* 压力使用原始值，不进行额外滤波 */
+    filtered->pressure_kg = raw->pressure_kg;
     
-    /* 压力微分（变化率） */
+    /* 压力微分（变化率）- 如需启用可取消注释
     filtered->pressure_derivative = diff_update(&ctrl->pressure_diff, 
                                                  filtered->pressure_kg, 
                                                  raw->timestamp_ms);
+    */
+    filtered->pressure_derivative = 0.0f;
     
-    /* 位置 */
+    /* 位置使用原始值 */
     filtered->position_m = raw->encoder_position_m;
     
-    /* 速度计算：位置微分 + 移动平均滤波 */
+    /* 速度计算：位置微分 + 移动平均滤波（仅速度需要滤波） */
     float raw_velocity = diff_update(&ctrl->position_diff,
                                       filtered->position_m,
                                       raw->timestamp_ms);
@@ -268,9 +272,12 @@ static void calculate_control_output(GravityUnloadController_t *ctrl,
     output->clutch_torque_nm = torque_nm;
     output->clutch_current_mA = torque_nm * ctrl->clutch_current_per_torque;
     
+    /* 增加基础电流，确保即使小压力也能有电流输出 */
+    output->clutch_current_mA += 50.0f;  /* 基础电流50mA */
+    
     /* 限制电流范围 */
-    if (output->clutch_current_mA < SAFETY_CLUTCH_CURRENT_MIN_MA) {
-        output->clutch_current_mA = SAFETY_CLUTCH_CURRENT_MIN_MA;
+    if (output->clutch_current_mA < 50.0f) {  /* 直接限制为50mA */
+        output->clutch_current_mA = 50.0f;
     } else if (output->clutch_current_mA > SAFETY_CLUTCH_CURRENT_MAX_MA) {
         output->clutch_current_mA = SAFETY_CLUTCH_CURRENT_MAX_MA;
     }
@@ -279,6 +286,9 @@ static void calculate_control_output(GravityUnloadController_t *ctrl,
     /* 电机角速度 = (V / R1 + C) * 编码器单位转换 */
     /* V是重物速度(m/s)，需要转换为电机速度指令 */
     float target_motor_speed = (filtered->velocity_m_s / ctrl->pulley_r1_m) * (1.0f + ctrl->motor_speed_compensation);
+    
+    /* 放大速度指令，确保电机能够转动 */
+    target_motor_speed *= 1000.0f;  /* 放大1000倍 */
     
     /* 使用PID控制器 */
     float pid_output = pid_update(&ctrl->pid, target_motor_speed, output->motor_velocity_actual);
@@ -382,6 +392,8 @@ static void* gravity_unload_thread(void *arg) {
     SensorDataFiltered_t filtered_data;
     ControlOutput_t control_output;
     
+    uint32_t last_print_time = 0;
+    
     while (1) {
         pthread_mutex_lock(&ctrl->mutex);
         int should_run = ctrl->running;
@@ -410,8 +422,21 @@ static void* gravity_unload_thread(void *arg) {
         }
         
         /* 输出到执行器 */
-        set_motor_velocity(control_output.motor_velocity_cmd);
-        set_clutch_current(control_output.clutch_current_mA);
+    set_motor_velocity(control_output.motor_velocity_cmd);
+    set_clutch_current(control_output.clutch_current_mA);
+    
+    /* 1Hz调试打印 */
+    uint32_t current_time = get_timestamp_ms();
+    if (current_time - last_print_time >= 1000) {
+            last_print_time = current_time;
+            printf("[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f I_clutch=%.1fmA V_motor=%.0f\n",
+                   filtered_data.pressure_kg,
+                   filtered_data.position_m,
+                   filtered_data.velocity_raw_m_s,
+                   filtered_data.velocity_m_s,
+                   control_output.clutch_current_mA,
+                   control_output.motor_velocity_cmd);
+        }
         
         /* 周期控制 */
         usleep(ALGO_CONTROL_PERIOD_MS * 1000);
