@@ -377,9 +377,9 @@ static ErrorCode_t read_pressure(SensorManager_t *manager, SensorData_t *data) {
         data->data.pressure.raw_value = raw_s16;
         data->data.pressure.zero_offset = s_pressure_zero_offset;
         
-        /* 应用去皮并转换为kg (3位小数) */
+        /* 应用去皮并转换为kg (2位小数) */
         int16_t adjusted = raw_s16 - s_pressure_zero_offset;
-        data->data.pressure.pressure_kg = (float)adjusted / 10.0f;
+        data->data.pressure.pressure_kg = (float)adjusted / 100.0f;
         
         data->data_valid = 1;
         data->last_read_us = get_time_us();
