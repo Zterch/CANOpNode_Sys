@@ -516,6 +516,18 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
     /* 停止线程 */
     sensor_mgr_stop(manager);
     
+    /* 更新基准值 - 实现掉电记忆功能 */
+    SensorData_t *encoder_data = &manager->datas[SENSOR_TYPE_ENCODER];
+    if (encoder_data->data_valid) {
+        /* 保存当前的绳长作为新的基准长度 */
+        s_rope_length_base = encoder_data->data.encoder.rope_length_mm;
+        /* 保存当前的编码器读数作为新的零点偏移 */
+        s_encoder_zero_offset = encoder_data->data.encoder.multi_turn_value;
+        
+        printf("[SENSOR] Updating encoder baseline before save: base=%.2fmm, offset=%u\n",
+               s_rope_length_base, s_encoder_zero_offset);
+    }
+    
     /* 保存数据 */
     save_encoder_data();
     save_pressure_data();
