@@ -342,20 +342,22 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
         
         /* 计算绳子长度 - 正确处理uint32_t溢出/回绕
          * 
-         * 公式: 绳长 = BASE_LENGTH_MM + (相对脉冲数 / 分辨率) × 每圈绳长
+         * 关键：使用有符号32位整数计算差值，正确处理回绕！
          * 
-         * 其中BASE_LENGTH_MM是上次保存的绝对位置，
-         * 相对脉冲数是编码器相对于ZERO_OFFSET的转动量。
+         * 原理：两个uint32_t值相减，结果转为int32_t，
+         * 如果差值在 ±20亿以内，结果正确。
+         * 
+         * 公式: 绳长 = BASE_LENGTH_MM + (相对脉冲数 / 分辨率) × 每圈绳长
          */
-        uint32_t pulse_diff;
-        if (multi_turn >= s_encoder_zero_offset) {
-            pulse_diff = multi_turn - s_encoder_zero_offset;
-        } else {
-            /* 处理回绕: 编码器从最大值回绕到0 */
-            pulse_diff = (UINT32_MAX - s_encoder_zero_offset) + multi_turn + 1;
+        int32_t pulse_diff_signed = (int32_t)(multi_turn - s_encoder_zero_offset);
+        
+        /* 安全检查：如果差值过大，可能是异常数据 */
+        if (pulse_diff_signed > 1000000 || pulse_diff_signed < -1000000) {
+            printf("[SENSOR] WARNING: Pulse diff too large (%d), using 0\n", pulse_diff_signed);
+            pulse_diff_signed = 0;
         }
         
-        float relative_turns = (float)pulse_diff / (float)s_encoder_resolution;
+        float relative_turns = (float)pulse_diff_signed / (float)s_encoder_resolution;
         float relative_length_mm = relative_turns * s_rope_length_per_turn;
         
         /* 总绳长 = 基准长度 + 相对位移 */
@@ -550,14 +552,17 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
     if (encoder_data->data_valid) {
         uint32_t current_multi_turn = encoder_data->data.encoder.multi_turn_value;
         
-        /* 计算当前相对位移 */
-        uint32_t pulse_diff;
-        if (current_multi_turn >= s_encoder_zero_offset) {
-            pulse_diff = current_multi_turn - s_encoder_zero_offset;
-        } else {
-            pulse_diff = (UINT32_MAX - s_encoder_zero_offset) + current_multi_turn + 1;
+        /* 计算当前相对位移 - 使用有符号差值 */
+        int32_t pulse_diff_signed = (int32_t)(current_multi_turn - s_encoder_zero_offset);
+        
+        /* 安全检查 */
+        if (pulse_diff_signed > 1000000 || pulse_diff_signed < -1000000) {
+            printf("[SENSOR] WARNING: Save pulse diff too large (%d), skipping update\n", 
+                   pulse_diff_signed);
+            return;
         }
-        float relative_turns = (float)pulse_diff / (float)s_encoder_resolution;
+        
+        float relative_turns = (float)pulse_diff_signed / (float)s_encoder_resolution;
         float relative_length = relative_turns * s_rope_length_per_turn;
         
         /* 新的BASE_LENGTH_MM = 原来的BASE + 相对位移长度
