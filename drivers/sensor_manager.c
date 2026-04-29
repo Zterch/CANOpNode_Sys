@@ -340,9 +340,16 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
         /* 计算角度 */
         data->data.encoder.angle_deg = (float)multi_turn * 360.0f / (float)s_encoder_resolution;
         
-        /* 计算绳子长度 */
-        int64_t relative_pulses = (int64_t)multi_turn - (int64_t)s_encoder_zero_offset;
-        float relative_turns = (float)relative_pulses / (float)s_encoder_resolution;
+        /* 计算绳子长度 - 正确处理uint32_t溢出/回绕 */
+        uint32_t pulse_diff;
+        if (multi_turn >= s_encoder_zero_offset) {
+            pulse_diff = multi_turn - s_encoder_zero_offset;
+        } else {
+            /* 处理回绕: 编码器从最大值回绕到0 */
+            pulse_diff = (UINT32_MAX - s_encoder_zero_offset) + multi_turn + 1;
+        }
+        
+        float relative_turns = (float)pulse_diff / (float)s_encoder_resolution;
         data->data.encoder.rope_length_mm = s_rope_length_base + 
                                             (relative_turns * s_rope_length_per_turn);
         
