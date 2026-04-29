@@ -340,7 +340,13 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
         /* 计算角度 */
         data->data.encoder.angle_deg = (float)multi_turn * 360.0f / (float)s_encoder_resolution;
         
-        /* 计算绳子长度 - 正确处理uint32_t溢出/回绕 */
+        /* 计算绳子长度 - 正确处理uint32_t溢出/回绕
+         * 
+         * 公式: 绳长 = BASE_LENGTH_MM + (相对脉冲数 / 分辨率) × 每圈绳长
+         * 
+         * 其中BASE_LENGTH_MM是上次保存的绝对位置，
+         * 相对脉冲数是编码器相对于ZERO_OFFSET的转动量。
+         */
         uint32_t pulse_diff;
         if (multi_turn >= s_encoder_zero_offset) {
             pulse_diff = multi_turn - s_encoder_zero_offset;
@@ -350,8 +356,10 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
         }
         
         float relative_turns = (float)pulse_diff / (float)s_encoder_resolution;
-        data->data.encoder.rope_length_mm = s_rope_length_base + 
-                                            (relative_turns * s_rope_length_per_turn);
+        float relative_length_mm = relative_turns * s_rope_length_per_turn;
+        
+        /* 总绳长 = 基准长度 + 相对位移 */
+        data->data.encoder.rope_length_mm = s_rope_length_base + relative_length_mm;
         
         data->data_valid = 1;
         data->last_read_us = get_time_us();
@@ -526,18 +534,48 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
     /* 停止线程 */
     sensor_mgr_stop(manager);
     
-    /* 更新基准值 - 实现掉电记忆功能 */
+    /* 更新基准值 - 实现掉电记忆功能
+     * 
+     * 原理：保存当前的"总绳长"作为新的BASE_LENGTH_MM，
+     * 同时保存当前的编码器读数作为新的ZERO_OFFSET。
+     * 
+     * 下次启动时：
+     * - 相对脉冲 = 新读数 - ZERO_OFFSET ≈ 0
+     * - 绳长 = BASE_LENGTH_MM + 0 = BASE_LENGTH_MM ✓
+     * 
+     * 注意：这里保存的BASE_LENGTH_MM已经是"绝对绳长"，
+     * 下次计算时会加上相对位移（约等于0），不会重复累积。
+     */
     SensorData_t *encoder_data = &manager->datas[SENSOR_TYPE_ENCODER];
     if (encoder_data->data_valid) {
         uint32_t current_multi_turn = encoder_data->data.encoder.multi_turn_value;
         
-        /* 保存当前的绳长作为新的基准长度 */
-        s_rope_length_base = encoder_data->data.encoder.rope_length_mm;
-        /* 保存当前的编码器读数作为新的零点偏移 */
-        s_encoder_zero_offset = current_multi_turn;
+        /* 计算当前相对位移 */
+        uint32_t pulse_diff;
+        if (current_multi_turn >= s_encoder_zero_offset) {
+            pulse_diff = current_multi_turn - s_encoder_zero_offset;
+        } else {
+            pulse_diff = (UINT32_MAX - s_encoder_zero_offset) + current_multi_turn + 1;
+        }
+        float relative_turns = (float)pulse_diff / (float)s_encoder_resolution;
+        float relative_length = relative_turns * s_rope_length_per_turn;
         
-        printf("[SENSOR] Updating encoder baseline before save: base=%.2fmm, offset=%u\n",
-               s_rope_length_base, s_encoder_zero_offset);
+        /* 新的BASE_LENGTH_MM = 原来的BASE + 相对位移长度
+         * 这是当前重物的绝对位置（从初始零点开始的总绳长）
+         */
+        float new_base_length = s_rope_length_base + relative_length;
+        
+        /* 限制BASE_LENGTH_MM的范围，防止异常值 */
+        if (new_base_length > 10000.0f || new_base_length < -10000.0f) {
+            printf("[SENSOR] WARNING: Base length out of range (%.2fmm), keeping old value\n", 
+                   new_base_length);
+        } else {
+            s_rope_length_base = new_base_length;
+            s_encoder_zero_offset = current_multi_turn;
+            
+            printf("[SENSOR] Updating encoder baseline: base=%.2fmm, offset=%u\n",
+                   s_rope_length_base, s_encoder_zero_offset);
+        }
     }
     
     /* 保存数据 */
