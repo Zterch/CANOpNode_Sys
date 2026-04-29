@@ -47,7 +47,7 @@ typedef struct {
     union {
         /* 编码器数据 */
         struct {
-            uint32_t multi_turn_value;      /* 多圈值 */
+            int32_t multi_turn_value;       /* 多圈值 - 改为有符号以支持负值 */
             float angle_deg;                /* 角度值 */
             float rope_length_mm;           /* 绳子长度 */
         } encoder;

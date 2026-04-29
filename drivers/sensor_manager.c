@@ -40,7 +40,7 @@ static float s_rope_drum_diameter = 100.0f;     /* 卷筒直径(mm) */
 static float s_rope_length_per_turn = 314.16f;  /* 每圈绳长(mm) */
 static float s_rope_length_base = 0.0f;         /* 基准长度(mm) */
 static uint32_t s_encoder_resolution = 4096;    /* 编码器分辨率 */
-static uint32_t s_encoder_zero_offset = 0;      /* 零点偏移 */
+static int32_t s_encoder_zero_offset = 0;       /* 零点偏移 - 改为有符号以支持负值 */
 
 /* 压力传感器参数 */
 static int16_t s_pressure_zero_offset = 0;      /* 压力传感器去皮偏移 */
@@ -83,7 +83,7 @@ static int load_encoder_data(void) {
         }
         /* 解析 ZERO_OFFSET */
         else if (strncmp(line, "ZERO_OFFSET=", 12) == 0) {
-            sscanf(line + 12, "%u", &s_encoder_zero_offset);
+            sscanf(line + 12, "%d", &s_encoder_zero_offset);
         }
         /* 解析 DRUM_DIAMETER */
         else if (strncmp(line, "DRUM_DIAMETER=", 14) == 0) {
@@ -100,7 +100,7 @@ static int load_encoder_data(void) {
     /* 重新计算每圈绳长 */
     s_rope_length_per_turn = M_PI * s_rope_drum_diameter;
     
-    printf("[SENSOR] Loaded encoder data: base=%.2fmm, offset=%u, drum=%.2fmm, res=%u\n",
+    printf("[SENSOR] Loaded encoder data: base=%.2fmm, offset=%d, drum=%.2fmm, res=%u\n",
            s_rope_length_base, s_encoder_zero_offset, s_rope_drum_diameter, s_encoder_resolution);
     
     return 0;
@@ -122,13 +122,13 @@ static int save_encoder_data(void) {
     fprintf(fp, "# Encoder Rope Length Data\n");
     fprintf(fp, "# Saved at: %s\n", time_str);
     fprintf(fp, "BASE_LENGTH_MM=%.4f\n", s_rope_length_base);
-    fprintf(fp, "ZERO_OFFSET=%u\n", s_encoder_zero_offset);
+    fprintf(fp, "ZERO_OFFSET=%d\n", s_encoder_zero_offset);
     fprintf(fp, "DRUM_DIAMETER=%.4f\n", s_rope_drum_diameter);
     fprintf(fp, "ENCODER_RESOLUTION=%u\n", s_encoder_resolution);
     
     fclose(fp);
     
-    printf("[SENSOR] Saved encoder data: base=%.2fmm, offset=%u\n",
+    printf("[SENSOR] Saved encoder data: base=%.2fmm, offset=%d\n",
            s_rope_length_base, s_encoder_zero_offset);
     
     return 0;
@@ -327,18 +327,22 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
     
     /* 解析32位多圈值 (大端模式) */
     if (rx_buf[2] == 4) {
-        uint32_t multi_turn = ((uint32_t)rx_buf[3] << 24) |
-                              ((uint32_t)rx_buf[4] << 16) |
-                              ((uint32_t)rx_buf[5] << 8) |
-                              ((uint32_t)rx_buf[6]);
+        /* 先按无符号读取原始数据 */
+        uint32_t raw_u32 = ((uint32_t)rx_buf[3] << 24) |
+                           ((uint32_t)rx_buf[4] << 16) |
+                           ((uint32_t)rx_buf[5] << 8) |
+                           ((uint32_t)rx_buf[6]);
         
-        /* 检查编码器数据合理性 - 防止异常值 */
-        if (multi_turn > 10000000) {  /* 如果值过大，可能是数据错误 */
-            printf("[SENSOR] WARNING: Invalid encoder multi_turn value: %u\n", multi_turn);
+        /* 关键：转换为有符号32位整数（编码器协议使用有符号） */
+        int32_t multi_turn = (int32_t)raw_u32;
+        
+        /* 检查编码器数据合理性 - 防止极端异常值 */
+        if (multi_turn > 10000000 || multi_turn < -10000000) {
+            printf("[SENSOR] WARNING: Encoder multi_turn out of range: %d\n", multi_turn);
             return ERR_COMM_FAIL;
         }
         
-        data->data.encoder.multi_turn_value = multi_turn;
+        data->data.encoder.multi_turn_value = (uint32_t)multi_turn;
         
         /* 计算角度 */
         data->data.encoder.angle_deg = (float)multi_turn * 360.0f / (float)s_encoder_resolution;
@@ -525,11 +529,11 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
     /* 更新基准值 - 实现掉电记忆功能 */
     SensorData_t *encoder_data = &manager->datas[SENSOR_TYPE_ENCODER];
     if (encoder_data->data_valid) {
-        uint32_t current_multi_turn = encoder_data->data.encoder.multi_turn_value;
+        int32_t current_multi_turn = encoder_data->data.encoder.multi_turn_value;
         
         /* 检查编码器数据合理性 - 防止异常值 */
-        if (current_multi_turn > 10000000) {  /* 如果值过大，可能是数据错误 */
-            printf("[SENSOR] WARNING: Encoder multi_turn value too large (%u), skipping update\n", 
+        if (current_multi_turn > 10000000 || current_multi_turn < -10000000) {
+            printf("[SENSOR] WARNING: Encoder multi_turn out of range (%d), skipping update\n", 
                    current_multi_turn);
         } else {
             /* 保存当前的绳长作为新的基准长度 */
@@ -537,7 +541,7 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
             /* 保存当前的编码器读数作为新的零点偏移 */
             s_encoder_zero_offset = current_multi_turn;
             
-            printf("[SENSOR] Updating encoder baseline before save: base=%.2fmm, offset=%u\n",
+            printf("[SENSOR] Updating encoder baseline before save: base=%.2fmm, offset=%d\n",
                    s_rope_length_base, s_encoder_zero_offset);
         }
     }
@@ -649,7 +653,7 @@ ErrorCode_t sensor_mgr_encoder_zero_calibration(SensorManager_t *manager) {
     
     s_encoder_zero_offset = data.data.encoder.multi_turn_value;
     
-    LOG_INFO(LOG_MODULE_SENSOR, "Zero calibration done: offset=%u", s_encoder_zero_offset);
+    LOG_INFO(LOG_MODULE_SENSOR, "Zero calibration done: offset=%d", s_encoder_zero_offset);
     
     return ERR_OK;
 }
@@ -740,7 +744,7 @@ void sensor_mgr_print_status(SensorManager_t *manager) {
         
         if (data->data_valid) {
             if (i == SENSOR_TYPE_ENCODER) {
-                printf("  Multi-turn: %u\n", data->data.encoder.multi_turn_value);
+                printf("  Multi-turn: %d\n", data->data.encoder.multi_turn_value);
                 printf("  Angle: %.2f deg\n", data->data.encoder.angle_deg);
                 printf("  Rope: %.2f mm\n", data->data.encoder.rope_length_mm);
             } else if (i == SENSOR_TYPE_PRESSURE) {
