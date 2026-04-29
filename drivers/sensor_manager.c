@@ -332,6 +332,12 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
                               ((uint32_t)rx_buf[5] << 8) |
                               ((uint32_t)rx_buf[6]);
         
+        /* 检查编码器数据合理性 - 防止异常值 */
+        if (multi_turn > 10000000) {  /* 如果值过大，可能是数据错误 */
+            printf("[SENSOR] WARNING: Invalid encoder multi_turn value: %u\n", multi_turn);
+            return ERR_COMM_FAIL;
+        }
+        
         data->data.encoder.multi_turn_value = multi_turn;
         
         /* 计算角度 */
@@ -519,13 +525,21 @@ void sensor_mgr_deinit(SensorManager_t *manager) {
     /* 更新基准值 - 实现掉电记忆功能 */
     SensorData_t *encoder_data = &manager->datas[SENSOR_TYPE_ENCODER];
     if (encoder_data->data_valid) {
-        /* 保存当前的绳长作为新的基准长度 */
-        s_rope_length_base = encoder_data->data.encoder.rope_length_mm;
-        /* 保存当前的编码器读数作为新的零点偏移 */
-        s_encoder_zero_offset = encoder_data->data.encoder.multi_turn_value;
+        uint32_t current_multi_turn = encoder_data->data.encoder.multi_turn_value;
         
-        printf("[SENSOR] Updating encoder baseline before save: base=%.2fmm, offset=%u\n",
-               s_rope_length_base, s_encoder_zero_offset);
+        /* 检查编码器数据合理性 - 防止异常值 */
+        if (current_multi_turn > 10000000) {  /* 如果值过大，可能是数据错误 */
+            printf("[SENSOR] WARNING: Encoder multi_turn value too large (%u), skipping update\n", 
+                   current_multi_turn);
+        } else {
+            /* 保存当前的绳长作为新的基准长度 */
+            s_rope_length_base = encoder_data->data.encoder.rope_length_mm;
+            /* 保存当前的编码器读数作为新的零点偏移 */
+            s_encoder_zero_offset = current_multi_turn;
+            
+            printf("[SENSOR] Updating encoder baseline before save: base=%.2fmm, offset=%u\n",
+                   s_rope_length_base, s_encoder_zero_offset);
+        }
     }
     
     /* 保存数据 */

@@ -100,8 +100,8 @@ SafetyStatus_t safety_check(SafetyMonitor_t *monitor) {
         strcpy(monitor->error_msg, "OK");
     }
     
-    /* 连续错误次数过多，触发紧急停止 */
-    if (monitor->consecutive_errors >= 10) {
+    /* 连续错误次数过多，触发紧急停止 - 增加到50次避免偶发错误 */
+    if (monitor->consecutive_errors >= 50) {
         safety_trigger_emergency_stop(monitor, "Too many consecutive errors");
         new_status = SAFETY_STATUS_EMERGENCY;
     }

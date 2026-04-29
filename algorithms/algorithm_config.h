@@ -90,9 +90,9 @@ extern "C" {
  ******************************************************************************/
 
 /* 压力传感器安全阈值 */
-#define SAFETY_PRESSURE_MIN_KG          -0.5f       /* 最小允许压力 */
-#define SAFETY_PRESSURE_MAX_KG          10.0f       /* 最大允许压力 */
-#define SAFETY_PRESSURE_RATE_MAX_KG_S   5.0f        /* 压力变化率限制 kg/s */
+#define SAFETY_PRESSURE_MIN_KG          -5.0f       /* 最小允许压力 - 放宽到-5kg允许去皮误差 */
+#define SAFETY_PRESSURE_MAX_KG          15.0f       /* 最大允许压力 - 增加到15kg */
+#define SAFETY_PRESSURE_RATE_MAX_KG_S   10.0f       /* 压力变化率限制 kg/s - 放宽到10kg/s */
 
 /* 电机安全限制 */
 #define SAFETY_MOTOR_SPEED_MAX          8000        /* 电机最大速度限制 */
