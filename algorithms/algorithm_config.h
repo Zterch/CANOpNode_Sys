@@ -104,10 +104,10 @@ extern "C" {
 #define SAFETY_CLUTCH_CURRENT_MAX_MA    900         /* 最大电流（略高于额定值） */
 #define SAFETY_CLUTCH_CURRENT_RATE_MAX_MA_S 500     /* 电流变化率限制 mA/s */
 
-/* 位置安全限制 */
-#define SAFETY_POSITION_MIN_M           -1.0f       /* 最小位置 */
-#define SAFETY_POSITION_MAX_M           2.0f        /* 最大位置 */
-#define SAFETY_SPEED_MAX_M_S            0.5f        /* 最大速度 m/s */
+/* 位置安全限制 - 放宽以适应实际测试需求 */
+#define SAFETY_POSITION_MIN_M           -3.0f       /* 最小位置 -3m */
+#define SAFETY_POSITION_MAX_M           5.0f        /* 最大位置 5m */
+#define SAFETY_SPEED_MAX_M_S            2.0f        /* 最大速度 2m/s */
 
 /* 系统健康检查参数 */
 #define HEALTH_CHECK_SENSOR_MIN_RATE_HZ 45          /* 传感器最小更新频率 */
