@@ -1,0 +1,56 @@
+# Build artifacts
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+*.srec
+
+# Build directories
+build/
+bin/
+Debug/
+Release/
+*.build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.settings/
+.project
+.cproject
+
+# Log files
+*.log
+debug.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# PDF documentation (keep for reference)
+# *.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Qt build files
+*.pro.user
+*.pro.user.*
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+Makefile.Debug
+Makefile.Release
