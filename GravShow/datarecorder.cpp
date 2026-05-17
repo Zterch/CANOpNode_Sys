@@ -99,13 +99,24 @@ void DataRecorder::onDataUpdated(const SensorData &data)
         return;
     }
     
-    // 写入CSV数据行
+    // 写入CSV数据行 - 扩展字段
+    QString statusStr = data.motorStatusStr;
+    statusStr.replace(",", ";");  // 避免CSV格式混乱
+    
     *m_stream << data.timestamp.toString("yyyy-MM-dd hh:mm:ss.zzz") << ","
               << data.current << ","
               << data.voltage << ","
               << data.pressure << ","
               << data.ropeLength << ","
-              << data.motorSpeed << "\n";
+              << data.encoderValue << ","
+              << data.encoderAngle << ","
+              << data.motorSpeed << ","
+              << data.motorPosition << ","
+              << data.motorStatus << ","
+              << statusStr << ","
+              << data.algorithmState << ","
+              << data.algorithmError << ","
+              << (data.emergencyStop ? 1 : 0) << "\n";
     
     m_stream->flush();  // 立即写入文件
     
@@ -122,7 +133,9 @@ QString DataRecorder::generateDefaultFileName() const
 void DataRecorder::writeCsvHeader()
 {
     if (m_stream) {
-        *m_stream << "Timestamp,Current(A),Voltage(V),Pressure(kg),RopeLength(m),MotorSpeed(rpm)\n";
+        *m_stream << "Timestamp,Current(A),Voltage(V),Pressure(kg),RopeLength(m),"
+                  << "EncoderValue,EncoderAngle(deg),MotorSpeed(rpm),MotorPosition,"
+                  << "MotorStatus,MotorStatusStr,AlgorithmState,AlgorithmError,EmergencyStop\n";
         m_stream->flush();
     }
 }

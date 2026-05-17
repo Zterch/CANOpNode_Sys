@@ -1,8 +1,9 @@
 #include "chartwidget.h"
 #include <QPainter>
 #include <QDebug>
+#include <QElapsedTimer>
 
-ChartWidget::ChartWidget(QWidget *parent) : QWidget(parent)
+ChartWidget::ChartWidget(DataModel *model, QWidget *parent) : QWidget(parent), m_dataModel(model)
 {
     setMinimumSize(800, 600);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -19,10 +20,38 @@ ChartWidget::ChartWidget(QWidget *parent) : QWidget(parent)
     QPalette pal = palette();
     pal.setColor(QPalette::Window, Qt::white);
     setPalette(pal);
+    
+    // 连接DataModel的数据更新信号（关键修复：改为事件驱动）
+    if (m_dataModel) {
+        connect(m_dataModel, &DataModel::dataUpdated, this, &ChartWidget::onDataUpdated);
+    }
+    
+    // 初始化图表更新定时器（用于强制刷新，20Hz）
+    m_updateTimer = new QTimer(this);
+    m_updateTimer->setTimerType(Qt::PreciseTimer);
+    m_updateTimer->setInterval(50);  // 50ms = 20Hz
+    connect(m_updateTimer, &QTimer::timeout, this, &ChartWidget::onUpdateTimer);
+    m_updateTimer->start();
+    
+    // 初始化统计定时器
+    m_statsTimer = new QElapsedTimer();
+    m_statsTimer->start();
+    m_frameCount = 0;
 }
 
 ChartWidget::~ChartWidget()
 {
+    if (m_updateTimer) {
+        m_updateTimer->stop();
+    }
+}
+
+void ChartWidget::setUpdateRate(int hz)
+{
+    if (hz > 0 && m_updateTimer) {
+        int intervalMs = 1000 / hz;
+        m_updateTimer->setInterval(intervalMs);
+    }
 }
 
 void ChartWidget::addDataPoint(const SensorData &data)
@@ -35,12 +64,9 @@ void ChartWidget::addDataPoint(const SensorData &data)
         m_dataBuffer.removeFirst();
     }
     
-    // 更新Y轴范围
+    // 更新Y轴范围（不重绘，由定时器统一刷新）
     calculateDataRange(m_yMinLeft, m_yMaxLeft, 0);  // 左侧Y轴（压力/绳长）
     calculateDataRange(m_yMinRight, m_yMaxRight, 2); // 右侧Y轴（电流/电压）
-    
-    // 触发重绘
-    update();
 }
 
 void ChartWidget::clearData()
@@ -88,6 +114,47 @@ void ChartWidget::setTimeRange(int seconds)
 void ChartWidget::updateChart()
 {
     update();
+}
+
+void ChartWidget::onDataUpdated(const SensorData &data)
+{
+    // 直接添加新数据点（事件驱动）
+    m_dataBuffer.append(data);
+    
+    // 限制缓冲区大小
+    if (m_dataBuffer.size() > m_maxPoints) {
+        m_dataBuffer.removeFirst();
+    }
+    
+    // 更新Y轴范围
+    calculateDataRange(m_yMinLeft, m_yMaxLeft, 0);
+    calculateDataRange(m_yMinRight, m_yMaxRight, 2);
+    
+    // 标记数据已更新
+    m_dataUpdated = true;
+    
+    // 关键修复：使用repaint()立即触发重绘，不等待事件队列
+    // update()会将重绘事件放入队列，可能被合并导致延迟
+    repaint();
+}
+
+void ChartWidget::onUpdateTimer()
+{
+    // 强制每50ms刷新一次，确保20Hz刷新率
+    // 使用repaint()立即重绘，避免Qt合并重绘事件导致的延迟
+    repaint();
+    
+    // 帧率统计（每100帧打印一次）
+    if (++m_frameCount >= 100) {
+        double elapsed = m_statsTimer->elapsed() / 1000.0;
+        double fps = m_frameCount / elapsed;
+        qDebug() << "Chart FPS:" << QString::number(fps, 'f', 1) << "Hz";
+        m_frameCount = 0;
+        m_statsTimer->restart();
+    }
+    
+    // 重置数据更新标志
+    m_dataUpdated = false;
 }
 
 void ChartWidget::paintEvent(QPaintEvent *event)
@@ -238,37 +305,43 @@ void ChartWidget::drawSeries(QPainter &painter, int seriesType, const QColor &co
     
     painter.setPen(QPen(color, 2));
     
-    QVector<QPointF> points;
+    QPainterPath path;
+    bool firstPoint = true;
+    
     double currentTime = m_startTime.secsTo(m_dataBuffer.last().timestamp);
     double startTime = qMax(0.0, currentTime - m_timeRange);
     
-    for (const auto &data : m_dataBuffer) {
-        double time = m_startTime.secsTo(data.timestamp);
+    // 使用指针访问数据以提高性能
+    const SensorData *dataPtr = m_dataBuffer.constData();
+    int dataSize = m_dataBuffer.size();
+    
+    for (int i = 0; i < dataSize; ++i) {
+        double time = m_startTime.secsTo(dataPtr[i].timestamp);
         if (time < startTime) {
             continue;
         }
         
-        QPointF point = dataToScreen(time, 0, seriesType);
-        
         // 根据类型获取实际值
         double value = 0;
         switch (seriesType) {
-        case 1: value = data.pressure; break;
-        case 2: value = data.ropeLength; break;
-        case 3: value = data.current; break;
-        case 4: value = data.voltage; break;
+        case 1: value = dataPtr[i].pressure; break;
+        case 2: value = dataPtr[i].ropeLength; break;
+        case 3: value = dataPtr[i].current; break;
+        case 4: value = dataPtr[i].voltage; break;
         }
         
-        point = dataToScreen(time, value, seriesType);
-        points.append(point);
-    }
-    
-    // 绘制折线
-    if (points.size() > 1) {
-        for (int i = 0; i < points.size() - 1; ++i) {
-            painter.drawLine(points[i], points[i + 1]);
+        QPointF point = dataToScreen(time, value, seriesType);
+        
+        if (firstPoint) {
+            path.moveTo(point);
+            firstPoint = false;
+        } else {
+            path.lineTo(point);
         }
     }
+    
+    // 一次性绘制整个路径
+    painter.drawPath(path);
 }
 
 QPointF ChartWidget::dataToScreen(double time, double value, int seriesType)

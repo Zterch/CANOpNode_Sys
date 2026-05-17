@@ -1,0 +1,38 @@
+zterch@zterch-TM1701:~/VS_Project/Nimo_COp_Prj/CANOpNode_Sys$ sudo ./bin/CANOpNode_Sys 
+[sudo] zterch 的密码： 
+Motor control enabled (use -n or --no-motor to disable)
+========================================
+CANOpNode_Sys v3.0.0 (Gravity Unload)
+Shared Memory Communication Enabled
+========================================
+
+[INIT] Phase 1: Initializing hardware...
+  -> Sensor manager... [SENSOR] Loaded: length=0.00mm, encoder=0
+[2026-05-12 15:24:26]INFO [SYS] [rs485_bus.c:111] RS485 bus /dev/ttyUSB1 opened at 115200 baud
+[2026-05-12 15:24:26]INFO [SYS] [rs485_bus.c:197] RS485 bus initialized (device=/dev/ttyUSB1, baud=115200)
+[SENSOR] Initialized
+OK
+  -> Power driver... [2026-05-12 15:24:26]INFO [POWER] [power_driver.c:113] Serial port /dev/ttyUSB0 opened at 115200 baud
+[2026-05-12 15:24:26]INFO [POWER] [power_driver.c:275] Power driver initialized (device=/dev/ttyUSB0, baud=115200)
+OK
+  -> Motor driver... [2026-05-12 15:24:26]INFO [MOTOR] [motor_driver.c:100] CAN interface can0 configured with bitrate 1000000 bps
+[2026-05-12 15:24:26]DEBUG [MOTOR] [motor_driver.c:248] SDO read: index=0x6081, subindex=0, value=0x20A10700, n=0
+[2026-05-12 15:24:26]DEBUG [MOTOR] [motor_driver.c:366] Profile velocity: 547424000 rpm
+[2026-05-12 15:24:26]INFO [MOTOR] [motor_driver.c:379] Motor driver initialized (Node ID=1, Interface=can0)
+OK
+  -> Motor ready (will enable when needed)
+  -> Starting sensor manager thread... [SENSOR] Started
+OK
+  -> Waiting for sensors to stabilize... OK
+  -> Calibrating sensors... [SENSOR] Encoder zero calibrated: offset=0
+[SENSOR] Pressure tared: offset=1525
+OK
+
+[INIT] Phase 2: Initializing shared memory...
+  -> Creating shared memory segment... [SHM] Shared memory permissions: 666
+OK (name=/gravshow_shm, size=4096)
+
+[INIT] Phase 3: System health check...
+[CHECK] Checking sensors...
+[CHECK PASS] Sensors OK (Pressure: 1.525 kg, Encoder: 0.000 m)
+[CHECK] Checking motor communication... 

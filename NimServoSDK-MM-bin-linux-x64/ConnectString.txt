@@ -1,0 +1,74 @@
+CANopen:
+{
+	"DevType": "1001",
+	"Baudrate": 8,
+	"PDOIntervalMS": 10,	//PDO通信周期
+	"SyncIntervalMS": 0,	//0不启动同步；启动同步时必须为PDOIntervalMS的整倍数
+	...... //CAN通信设备相关配置
+}
+
+CANopen -- NiMotion USB-CAN Device
+{
+	"DevType": "1001",
+	"Baudrate": 8,
+	"PDOIntervalMS": 10,
+	"SyncIntervalMS": 0,
+	"DevIndex": 0
+}
+
+CANopen -- 周立功 USB-CAN Device
+{
+	"DevType": "1002",
+	"Baudrate": 8,
+	"PDOIntervalMS": 10,
+	"SyncIntervalMS": 0,
+	"ChannelNum": 1,
+	"DevIndex": 0,
+	"ChannelIndex": 0
+}
+
+CANopen -- Ixxat USB-CAN Device
+{
+	"DevType": "1003",
+	"Baudrate": 8,
+	"PDOIntervalMS": 10,
+	"SyncIntervalMS": 0,
+	"DevIndex": 0
+}
+
+CANopen -- NiMotion TCP-CAN Device
+{
+	"DevType": "1004",
+	"Baudrate": 8,
+	"PDOIntervalMS": 10,
+	"SyncIntervalMS": 0,
+	"IP": "192.168.0.100",
+	"Port": 40001
+}
+
+CANopen -- Linux SocketCAN Device
+{
+	"DevType": "1005",
+	"Baudrate": 8,
+	"PDOIntervalMS": 10,
+	"SyncIntervalMS": 0,
+	"DeviceName": "can0"
+}
+
+EtherCAT：
+{
+	"NetworkAdapter": "eth0",
+	"OverlappingPDO": true,		//true使用重叠PDO；false 不使用重叠PDO
+	"PDOIntervalMS": 10			//PDO通信周期
+}
+
+Modbus:
+{
+	"SerialPort": "COM1",
+	"Boaudrate": 115200,
+	"Parity": "N",			//N 无校验；O 奇校验； E 偶校验
+	"DataBits": 8,
+	"StopBits": 1,
+	"PDOIntervalMS": 10,	//PDO通信周期
+	"SyncIntervalMS": 0		//0不启动同步；启动同步时必须为PDOIntervalMS的整倍数
+}

@@ -1,4 +1,4 @@
-QT       += core gui widgets network
+QT       += core gui widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,18 +12,21 @@ TARGET = GravShow
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
+# 共享内存需要实时库
+LIBS += -lrt
+
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
     datamodel.cpp \
-    datacollector.cpp \
+    shmdatacollector.cpp \
     datarecorder.cpp \
     chartwidget.cpp
 
 HEADERS += \
     mainwindow.h \
     datamodel.h \
-    datacollector.h \
+    shmdatacollector.h \
     datarecorder.h \
     chartwidget.h
 

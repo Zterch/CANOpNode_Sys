@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
-    <height>800</height>
+    <width>1400</width>
+    <height>900</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,64 +24,13 @@
         </property>
         <layout class="QFormLayout" name="formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="labelCurrent">
-           <property name="text">
-            <string>电流:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="labelCurrentValue">
-           <property name="text">
-            <string>0.000 A</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">font-weight: bold; color: red;</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="labelVoltage">
-           <property name="text">
-            <string>电压:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="labelVoltageValue">
-           <property name="text">
-            <string>0.00 V</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">font-weight: bold; color: magenta;</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="labelPressure">
-           <property name="text">
-            <string>压力:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="labelPressureValue">
-           <property name="text">
-            <string>0.000 kg</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">font-weight: bold; color: blue;</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
           <widget class="QLabel" name="labelRope">
            <property name="text">
             <string>绳长:</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="0" column="1">
           <widget class="QLabel" name="labelRopeValue">
            <property name="text">
             <string>0.000 m</string>
@@ -91,31 +40,133 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="labelEncoder">
+           <property name="text">
+            <string>编码器:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="labelEncoderValue">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-weight: bold; color: darkBlue;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="labelCurrent">
+           <property name="text">
+            <string>电流:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="labelCurrentValue">
+           <property name="text">
+            <string>0.000 A</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-weight: bold; color: red;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="labelVoltage">
+           <property name="text">
+            <string>电压:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="labelVoltageValue">
+           <property name="text">
+            <string>0.00 V</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-weight: bold; color: magenta;</string>
+           </property>
+          </widget>
+         </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="labelSpeed">
+          <widget class="QLabel" name="labelMotorSpeed">
            <property name="text">
             <string>电机速度:</string>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QLabel" name="labelSpeedValue">
+          <widget class="QLabel" name="labelMotorSpeedValue">
            <property name="text">
-            <string>0.0 rpm</string>
+            <string>0 rpm</string>
            </property>
            <property name="styleSheet">
-            <string notr="true">font-weight: bold;</string>
+            <string notr="true">font-weight: bold; color: orange;</string>
            </property>
           </widget>
          </item>
          <item row="5" column="0">
+          <widget class="QLabel" name="labelMotorPosition">
+           <property name="text">
+            <string>电机位置:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLabel" name="labelMotorPositionValue">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-weight: bold; color: purple;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="labelMotorStatus">
+           <property name="text">
+            <string>电机状态:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLabel" name="labelMotorStatusValue">
+           <property name="text">
+            <string>Stopped</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-weight: bold; color: gray;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="labelPressure">
+           <property name="text">
+            <string>压力:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QLabel" name="labelPressureValue">
+           <property name="text">
+            <string>0.000 kg</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-weight: bold; color: blue;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
           <widget class="QLabel" name="labelDataCount">
            <property name="text">
             <string>数据点数:</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="8" column="1">
           <widget class="QLabel" name="labelDataCountValue">
            <property name="text">
             <string>0</string>
@@ -126,9 +177,227 @@
        </widget>
       </item>
       <item>
+       <widget class="QGroupBox" name="groupBoxMotorControl">
+        <property name="title">
+         <string>电机控制（算法运行前）</string>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayoutMotor">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutVelocity">
+           <item>
+            <widget class="QLabel" name="labelVelocityInput">
+             <property name="text">
+              <string>速度(rpm):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxVelocity">
+             <property name="minimum">
+              <double>-10000.0</double>
+             </property>
+             <property name="maximum">
+              <double>10000.0</double>
+             </property>
+             <property name="singleStep">
+              <double>100.0</double>
+             </property>
+             <property name="value">
+              <double>0.0</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSetVelocity">
+             <property name="text">
+              <string>设置速度</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutPosition">
+           <item>
+            <widget class="QLabel" name="labelPositionInput">
+             <property name="text">
+              <string>位置:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxPosition">
+             <property name="minimum">
+              <double>-999999.0</double>
+             </property>
+             <property name="maximum">
+              <double>999999.0</double>
+             </property>
+             <property name="singleStep">
+              <double>1000.0</double>
+             </property>
+             <property name="value">
+              <double>0.0</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSetPosition">
+             <property name="text">
+              <string>设置位置</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutMotorBasic">
+           <item>
+            <widget class="QPushButton" name="btnMotorEnable">
+             <property name="text">
+              <string>使能电机</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnMotorDisable">
+             <property name="text">
+              <string>失能电机</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnMotorStop">
+             <property name="text">
+              <string>停止</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: red; color: white;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxPowerControl">
+        <property name="title">
+         <string>电源板控制</string>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayoutPower">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutPowerCurrent">
+           <item>
+            <widget class="QLabel" name="labelPowerCurrent">
+             <property name="text">
+              <string>电流(A):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxPowerCurrent">
+             <property name="minimum">
+              <double>0.05</double>
+             </property>
+             <property name="maximum">
+              <double>4.0</double>
+             </property>
+             <property name="singleStep">
+              <double>0.1</double>
+             </property>
+             <property name="value">
+              <double>0.5</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSetPowerCurrent">
+             <property name="text">
+              <string>设置电流</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutPowerVoltage">
+           <item>
+            <widget class="QLabel" name="labelPowerVoltage">
+             <property name="text">
+              <string>电压(V):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxPowerVoltage">
+             <property name="minimum">
+              <double>0.0</double>
+             </property>
+             <property name="maximum">
+              <double>30.0</double>
+             </property>
+             <property name="singleStep">
+              <double>0.5</double>
+             </property>
+             <property name="value">
+              <double>12.0</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSetPowerVoltage">
+             <property name="text">
+              <string>设置电压</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayoutPowerOnOff">
+           <item>
+            <widget class="QPushButton" name="btnPowerOn">
+             <property name="text">
+              <string>电源开启</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: green; color: white;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnPowerOff">
+             <property name="text">
+              <string>电源关闭</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: red; color: white;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QGroupBox" name="groupBoxControl">
         <property name="title">
-         <string>控制</string>
+         <string>数据采集控制</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -271,8 +540,8 @@
      <widget class="QWidget" name="chartContainer" native="true">
       <property name="minimumSize">
        <size>
-        <width>800</width>
-        <height>600</height>
+        <width>900</width>
+        <height>700</height>
        </size>
       </property>
      </widget>
@@ -284,7 +553,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1400</width>
      <height>22</height>
     </rect>
    </property>

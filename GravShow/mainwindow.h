@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "datamodel.h"
-#include "datacollector.h"
+#include "shmdatacollector.h"
 #include "datarecorder.h"
 #include "chartwidget.h"
 
@@ -13,7 +13,12 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 /**
- * @brief 重力卸载系统数据监控主窗口
+ * @brief 重力卸载系统数据监控主窗口 v2.0
+ * 
+ * 新特性：
+ * - 共享内存通信（20Hz）
+ * - 算法独立监控
+ * - 远程电机控制
  */
 class MainWindow : public QMainWindow
 {
@@ -44,6 +49,8 @@ private slots:
     // 状态更新
     void onCollectorStarted();
     void onCollectorStopped();
+    void onCollectorConnected();
+    void onCollectorDisconnected();
     void onRecorderStarted(const QString &filePath);
     void onRecorderStopped();
     
@@ -53,6 +60,23 @@ private slots:
     
     // 定时更新UI
     void onUpdateTimer();
+    
+    // 电机控制槽函数（通过共享内存）
+    void onSetVelocityClicked();
+    void onSetPositionClicked();
+    void onMotorEnableClicked();
+    void onMotorDisableClicked();
+    void onMotorStopClicked();
+    
+    // 算法控制
+    void onAlgorithmStartClicked();
+    void onAlgorithmStopClicked();
+    
+    // 电源板控制槽函数
+    void onSetPowerCurrentClicked();
+    void onSetPowerVoltageClicked();
+    void onPowerOnClicked();
+    void onPowerOffClicked();
 
 private:
     // 初始化UI
@@ -64,6 +88,9 @@ private:
     // 更新数据显示
     void updateDataDisplay(const SensorData &data);
     
+    // 更新连接状态显示
+    void updateConnectionStatus();
+    
     // 加载CSV文件
     bool loadCsvFile(const QString &filePath);
 
@@ -72,7 +99,7 @@ private:
     
     // 核心组件
     DataModel *m_dataModel;
-    DataCollector *m_dataCollector;
+    ShmDataCollector *m_dataCollector;  // 使用共享内存收集器
     DataRecorder *m_dataRecorder;
     ChartWidget *m_chartWidget;
     

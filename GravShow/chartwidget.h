@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QPainter>
 #include <QVector>
+#include <QTimer>
+#include <QElapsedTimer>
 #include "datamodel.h"
 
 /**
@@ -14,8 +16,11 @@ class ChartWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChartWidget(QWidget *parent = nullptr);
+    explicit ChartWidget(DataModel *model, QWidget *parent = nullptr);
     ~ChartWidget();
+    
+    // 设置图表更新频率（Hz）
+    void setUpdateRate(int hz);
 
     // 添加数据点
     void addDataPoint(const SensorData &data);
@@ -35,6 +40,12 @@ public:
 public slots:
     // 更新显示
     void updateChart();
+    
+    // 定时器触发的更新函数
+    void onUpdateTimer();
+    
+    // 数据更新槽函数（事件驱动）
+    void onDataUpdated(const SensorData &data);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -54,7 +65,10 @@ private:
     void calculateDataRange(double &minVal, double &maxVal, int seriesType);
 
 private:
-    // 数据存储
+    // 数据模型（用于实时数据获取）
+    DataModel *m_dataModel;
+    
+    // 数据存储（用于历史数据）
     QVector<SensorData> m_dataBuffer;
     int m_maxPoints = 2000;  // 最大显示点数
     int m_timeRange = 60;    // 默认显示60秒
@@ -73,6 +87,16 @@ private:
     // Y轴范围缓存
     double m_yMinLeft = -1.0, m_yMaxLeft = 5.0;
     double m_yMinRight = 0.0, m_yMaxRight = 10.0;
+    
+    // 图表更新定时器（固定频率刷新）
+    QTimer *m_updateTimer;
+    
+    // 帧率统计
+    QElapsedTimer *m_statsTimer;
+    int m_frameCount;
+    
+    // 数据更新标志（用于事件驱动更新）
+    bool m_dataUpdated = false;
 };
 
 #endif // CHARTWIDGET_H

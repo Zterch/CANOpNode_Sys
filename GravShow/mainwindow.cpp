@@ -17,11 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     
     // 初始化核心组件
     m_dataModel = new DataModel(this);
-    m_dataCollector = new DataCollector(m_dataModel, this);
+    m_dataCollector = new ShmDataCollector(m_dataModel, this);
     m_dataRecorder = new DataRecorder(m_dataModel, this);
     
-    // 创建图表控件
-    m_chartWidget = new ChartWidget(this);
+    // 创建图表控件（传入数据模型）
+    m_chartWidget = new ChartWidget(m_dataModel, this);
     
     // 初始化UI
     initUI();
@@ -30,9 +30,12 @@ MainWindow::MainWindow(QWidget *parent)
     connectSignals();
     
     // 设置窗口标题
-    setWindowTitle("重力卸载系统数据监控 - GravShow v1.0");
+    setWindowTitle("重力卸载系统数据监控 - GravShow v2.0 [共享内存模式]");
     
-    qDebug() << "MainWindow initialized";
+    // 更新连接状态
+    updateConnectionStatus();
+    
+    qDebug() << "MainWindow initialized (Shared Memory Mode)";
 }
 
 MainWindow::~MainWindow()
@@ -59,20 +62,25 @@ void MainWindow::initUI()
     ui->labelRecordStatus->setText("未记录");
     ui->labelRecordStatus->setStyleSheet("color: gray;");
     
-    // 设置数据文件路径
-    ui->lineEditDataPath->setText(m_dataCollector->dataFilePath());
+    // 隐藏数据文件路径选择（共享内存不需要）
+    ui->lineEditDataPath->setText("共享内存: /gravshow_shm");
+    ui->lineEditDataPath->setEnabled(false);
+    ui->btnBrowse->setEnabled(false);
     
     // 添加显示类型选项
     ui->comboBoxDisplayType->addItem("全部显示", 0);
-    ui->comboBoxDisplayType->addItem("仅压力", 1);
     ui->comboBoxDisplayType->addItem("仅绳长", 2);
+    ui->comboBoxDisplayType->addItem("仅编码器", 1);
     ui->comboBoxDisplayType->addItem("仅电流", 3);
     ui->comboBoxDisplayType->addItem("仅电压", 4);
+    ui->comboBoxDisplayType->addItem("仅电机速度", 5);
+    ui->comboBoxDisplayType->addItem("仅电机位置", 6);
+    ui->comboBoxDisplayType->addItem("仅压力", 7);
     
     // 创建定时器用于更新UI
     m_updateTimer = new QTimer(this);
     connect(m_updateTimer, &QTimer::timeout, this, &MainWindow::onUpdateTimer);
-    m_updateTimer->start(100);  // 100ms更新一次UI
+    m_updateTimer->start(50);  // 50ms = 20Hz更新UI
 }
 
 void MainWindow::connectSignals()
@@ -83,23 +91,30 @@ void MainWindow::connectSignals()
     connect(ui->btnRecordStart, &QPushButton::clicked, this, &MainWindow::onRecordStartClicked);
     connect(ui->btnRecordStop, &QPushButton::clicked, this, &MainWindow::onRecordStopClicked);
     connect(ui->btnLoadHistory, &QPushButton::clicked, this, &MainWindow::onLoadHistoryClicked);
-    connect(ui->btnBrowse, &QPushButton::clicked, this, [this]() {
-        QString filePath = QFileDialog::getOpenFileName(this, "选择数据文件", 
-            "/home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys/share", "文本文件 (*.txt)");
-        if (!filePath.isEmpty()) {
-            ui->lineEditDataPath->setText(filePath);
-            m_dataCollector->setDataFilePath(filePath);
-        }
-    });
+    
+    // 电机控制按钮（通过共享内存）
+    connect(ui->btnSetVelocity, &QPushButton::clicked, this, &MainWindow::onSetVelocityClicked);
+    connect(ui->btnSetPosition, &QPushButton::clicked, this, &MainWindow::onSetPositionClicked);
+    connect(ui->btnMotorEnable, &QPushButton::clicked, this, &MainWindow::onMotorEnableClicked);
+    connect(ui->btnMotorDisable, &QPushButton::clicked, this, &MainWindow::onMotorDisableClicked);
+    connect(ui->btnMotorStop, &QPushButton::clicked, this, &MainWindow::onMotorStopClicked);
+    
+    // 电源板控制按钮（通过共享内存）
+    connect(ui->btnSetPowerCurrent, &QPushButton::clicked, this, &MainWindow::onSetPowerCurrentClicked);
+    connect(ui->btnSetPowerVoltage, &QPushButton::clicked, this, &MainWindow::onSetPowerVoltageClicked);
+    connect(ui->btnPowerOn, &QPushButton::clicked, this, &MainWindow::onPowerOnClicked);
+    connect(ui->btnPowerOff, &QPushButton::clicked, this, &MainWindow::onPowerOffClicked);
     
     // 显示类型切换
     connect(ui->comboBoxDisplayType, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::onDisplayTypeChanged);
     
-    // 数据采集器信号
-    connect(m_dataCollector, &DataCollector::started, this, &MainWindow::onCollectorStarted);
-    connect(m_dataCollector, &DataCollector::stopped, this, &MainWindow::onCollectorStopped);
-    connect(m_dataCollector, &DataCollector::error, this, &MainWindow::onCollectorError);
+    // 数据采集器信号（共享内存）
+    connect(m_dataCollector, &ShmDataCollector::started, this, &MainWindow::onCollectorStarted);
+    connect(m_dataCollector, &ShmDataCollector::stopped, this, &MainWindow::onCollectorStopped);
+    connect(m_dataCollector, &ShmDataCollector::connected, this, &MainWindow::onCollectorConnected);
+    connect(m_dataCollector, &ShmDataCollector::disconnected, this, &MainWindow::onCollectorDisconnected);
+    connect(m_dataCollector, &ShmDataCollector::error, this, &MainWindow::onCollectorError);
     
     // 数据记录器信号
     connect(m_dataRecorder, &DataRecorder::recordingStarted, this, &MainWindow::onRecorderStarted);
@@ -112,11 +127,8 @@ void MainWindow::connectSignals()
 
 void MainWindow::onStartClicked()
 {
-    // 设置数据文件路径
-    m_dataCollector->setDataFilePath(ui->lineEditDataPath->text());
-    
-    // 开始采集
-    m_dataCollector->start(100);  // 100ms采集间隔
+    // 开始采集（20Hz）
+    m_dataCollector->start(50);  // 50ms = 20Hz
     
     ui->btnStart->setEnabled(false);
     ui->btnStop->setEnabled(true);
@@ -169,8 +181,8 @@ void MainWindow::onRecordStopClicked()
 
 void MainWindow::onDataUpdated(const SensorData &data)
 {
-    // 更新图表
-    m_chartWidget->addDataPoint(data);
+    // 数据更新只添加到缓冲区，图表更新由定时器统一处理
+    // 避免每次数据到来都触发重绘，减少CPU负担
 }
 
 void MainWindow::onLoadHistoryClicked()
@@ -196,13 +208,27 @@ void MainWindow::onDisplayTypeChanged(int index)
 
 void MainWindow::onCollectorStarted()
 {
-    ui->labelCollectStatus->setText("采集中");
+    ui->labelCollectStatus->setText("采集中 (20Hz)");
     ui->labelCollectStatus->setStyleSheet("color: green;");
 }
 
 void MainWindow::onCollectorStopped()
 {
     ui->labelCollectStatus->setText("已停止");
+    ui->labelCollectStatus->setStyleSheet("color: red;");
+}
+
+void MainWindow::onCollectorConnected()
+{
+    updateConnectionStatus();
+    ui->labelCollectStatus->setText("已连接");
+    ui->labelCollectStatus->setStyleSheet("color: green;");
+}
+
+void MainWindow::onCollectorDisconnected()
+{
+    updateConnectionStatus();
+    ui->labelCollectStatus->setText("断开");
     ui->labelCollectStatus->setStyleSheet("color: red;");
 }
 
@@ -233,19 +259,38 @@ void MainWindow::onUpdateTimer()
     // 定期更新UI显示
     SensorData data = m_dataModel->latestData();
     updateDataDisplay(data);
+    
+    // 更新连接状态
+    updateConnectionStatus();
+}
+
+void MainWindow::updateConnectionStatus()
+{
+    if (m_dataCollector->isConnected()) {
+        if (!m_isCollecting) {
+            ui->labelCollectStatus->setText("就绪");
+            ui->labelCollectStatus->setStyleSheet("color: blue;");
+        }
+    } else {
+        ui->labelCollectStatus->setText("未连接");
+        ui->labelCollectStatus->setStyleSheet("color: gray;");
+    }
 }
 
 void MainWindow::updateDataDisplay(const SensorData &data)
 {
     // 更新数值显示
+    ui->labelRopeValue->setText(QString::number(data.ropeLength, 'f', 3) + " m");
+    ui->labelEncoderValue->setText(QString::number(data.encoderValue));
     ui->labelCurrentValue->setText(QString::number(data.current, 'f', 3) + " A");
     ui->labelVoltageValue->setText(QString::number(data.voltage, 'f', 2) + " V");
+    ui->labelMotorSpeedValue->setText(QString::number(data.motorSpeed, 'f', 1) + " rpm");
+    ui->labelMotorPositionValue->setText(QString::number(data.motorPosition, 'f', 0));
+    ui->labelMotorStatusValue->setText(data.motorStatusStr.isEmpty() ? "Unknown" : data.motorStatusStr);
     ui->labelPressureValue->setText(QString::number(data.pressure, 'f', 3) + " kg");
-    ui->labelRopeValue->setText(QString::number(data.ropeLength, 'f', 3) + " m");
-    ui->labelSpeedValue->setText(QString::number(data.motorSpeed, 'f', 1) + " rpm");
     
     // 更新数据点数
-    ui->labelDataCount->setText(QString::number(m_dataModel->dataCount()));
+    ui->labelDataCountValue->setText(QString::number(m_dataModel->dataCount()));
 }
 
 bool MainWindow::loadCsvFile(const QString &filePath)
@@ -278,9 +323,36 @@ bool MainWindow::loadCsvFile(const QString &filePath)
             data.voltage = parts[2].toDouble();
             data.pressure = parts[3].toDouble();
             data.ropeLength = parts[4].toDouble();
+            
+            // 扩展字段
             if (parts.size() >= 6) {
-                data.motorSpeed = parts[5].toDouble();
+                data.encoderValue = parts[5].toUInt();
             }
+            if (parts.size() >= 7) {
+                data.encoderAngle = parts[6].toDouble();
+            }
+            if (parts.size() >= 8) {
+                data.motorSpeed = parts[7].toDouble();
+            }
+            if (parts.size() >= 9) {
+                data.motorPosition = parts[8].toDouble();
+            }
+            if (parts.size() >= 10) {
+                data.motorStatus = parts[9].toInt();
+            }
+            if (parts.size() >= 11) {
+                data.motorStatusStr = parts[10];
+            }
+            if (parts.size() >= 12) {
+                data.algorithmState = parts[11].toInt();
+            }
+            if (parts.size() >= 13) {
+                data.algorithmError = parts[12].toInt();
+            }
+            if (parts.size() >= 14) {
+                data.emergencyStop = (parts[13].toInt() != 0);
+            }
+            
             history.append(data);
         }
     }
@@ -294,4 +366,120 @@ bool MainWindow::loadCsvFile(const QString &filePath)
     }
     
     return false;
+}
+
+// 电机控制槽函数（通过共享内存）
+void MainWindow::onSetVelocityClicked()
+{
+    double velocity = ui->spinBoxVelocity->value();
+    if (m_dataCollector->sendMotorCommand(1, velocity, 0)) {
+        QMessageBox::information(this, "电机控制", 
+            QString("速度命令已发送: %1 rpm").arg(velocity));
+    } else {
+        QMessageBox::warning(this, "电机控制错误", 
+            "发送速度命令失败，请检查共享内存连接");
+    }
+}
+
+void MainWindow::onSetPositionClicked()
+{
+    double position = ui->spinBoxPosition->value();
+    if (m_dataCollector->sendMotorCommand(2, position, 0)) {
+        QMessageBox::information(this, "电机控制", 
+            QString("位置命令已发送: %1").arg(position));
+    } else {
+        QMessageBox::warning(this, "电机控制错误", 
+            "发送位置命令失败，请检查共享内存连接");
+    }
+}
+
+void MainWindow::onMotorEnableClicked()
+{
+    if (m_dataCollector->sendMotorCommand(4, 0, 0)) {
+        QMessageBox::information(this, "电机控制", "电机使能命令已发送");
+    } else {
+        QMessageBox::warning(this, "电机控制错误", "发送使能命令失败");
+    }
+}
+
+void MainWindow::onMotorDisableClicked()
+{
+    if (m_dataCollector->sendMotorCommand(5, 0, 0)) {
+        QMessageBox::information(this, "电机控制", "电机失能命令已发送");
+    } else {
+        QMessageBox::warning(this, "电机控制错误", "发送失能命令失败");
+    }
+}
+
+void MainWindow::onMotorStopClicked()
+{
+    if (m_dataCollector->sendMotorCommand(3, 0, 0)) {
+        QMessageBox::information(this, "电机控制", "电机停止命令已发送");
+    } else {
+        QMessageBox::warning(this, "电机控制错误", "发送停止命令失败");
+    }
+}
+
+// 算法控制槽函数
+void MainWindow::onAlgorithmStartClicked()
+{
+    if (m_dataCollector->sendAlgorithmStart()) {
+        QMessageBox::information(this, "算法控制", "算法启动命令已发送");
+    } else {
+        QMessageBox::warning(this, "算法控制错误", "发送启动命令失败");
+    }
+}
+
+void MainWindow::onAlgorithmStopClicked()
+{
+    if (m_dataCollector->sendAlgorithmStop()) {
+        QMessageBox::information(this, "算法控制", "算法停止命令已发送");
+    } else {
+        QMessageBox::warning(this, "算法控制错误", "发送停止命令失败");
+    }
+}
+
+// 电源板控制槽函数
+void MainWindow::onSetPowerCurrentClicked()
+{
+    double current = ui->spinBoxPowerCurrent->value();
+    if (m_dataCollector->sendPowerCommand(6, current)) {  // cmd_type 6 = 设置电流
+        QMessageBox::information(this, "电源板控制", 
+            QString("电流命令已发送: %1 A").arg(current));
+    } else {
+        QMessageBox::warning(this, "电源板控制错误", 
+            "发送电流命令失败，请检查共享内存连接");
+    }
+}
+
+void MainWindow::onSetPowerVoltageClicked()
+{
+    double voltage = ui->spinBoxPowerVoltage->value();
+    if (m_dataCollector->sendPowerCommand(7, voltage)) {  // cmd_type 7 = 设置电压
+        QMessageBox::information(this, "电源板控制", 
+            QString("电压命令已发送: %1 V").arg(voltage));
+    } else {
+        QMessageBox::warning(this, "电源板控制错误", 
+            "发送电压命令失败，请检查共享内存连接");
+    }
+}
+
+void MainWindow::onPowerOnClicked()
+{
+    // 电源开启：设置默认电流0.5A
+    if (m_dataCollector->sendPowerCommand(6, 0.5)) {
+        QMessageBox::information(this, "电源板控制", "电源已开启 (0.5A)");
+    } else {
+        QMessageBox::warning(this, "电源板控制错误", "开启电源失败");
+    }
+}
+
+void MainWindow::onPowerOffClicked()
+{
+    // 电源关闭：设置最小电流50mA
+    if (m_dataCollector->sendPowerCommand(6, 0.05)) {
+        QMessageBox::information(this, "电源板控制", "电源已关闭 (50mA)");
+    } else {
+        QMessageBox::warning(this, "电源板控制错误", "关闭电源失败");
+    }
 }
