@@ -1,9 +1,15 @@
 /******************************************************************************
  * @file    motor_driver.h
- * @brief   CANopen电机驱动 - Nimotion伺服电机控制
+ * @brief   NiMotion SDK电机驱动 - 工业级CANopen主站控制
  * @author  System Architect
- * @date    2026-04-16
- * @version 1.0.0
+ * @date    2026-05-12
+ * @version 2.0.0
+ * 
+ * @description
+ * 基于NiMotion NimServoSDK的电机驱动实现
+ * - 支持100Hz PDO实时控制
+ * - 支持CSV/CSP/CST等同步模式
+ * - 工业级错误处理和状态管理
  ******************************************************************************/
 
 #ifndef __MOTOR_DRIVER_H__
@@ -18,7 +24,7 @@ extern "C" {
 #endif
 
 /******************************************************************************
- * 电机状态定义
+ * 电机状态定义 (CiA 402标准)
  ******************************************************************************/
 typedef enum {
     MOTOR_STATE_INIT = 0,       /* 初始化 */
@@ -51,28 +57,46 @@ typedef struct {
     /* 配置参数 */
     uint8_t node_id;            /* CAN节点ID */
     char can_interface[16];     /* CAN接口名称 */
-    int socket_fd;              /* CAN套接字 */
+    
+    /* SDK句柄 */
+    unsigned int sdk_master;    /* SDK主站句柄 */
+    int sdk_initialized;        /* SDK初始化标志 */
     
     /* 状态信息 */
     MotorState_t state;         /* 电机状态 */
     MotorMode_t mode;           /* 当前模式 */
     uint16_t status_word;       /* 状态字 */
     
-    /* 实时数据 */
-    int32_t actual_position;    /* 实际位置 */
-    int32_t actual_velocity;    /* 实际速度 */
-    int32_t actual_torque;      /* 实际转矩 */
-    int32_t target_velocity;    /* 目标速度 */
-    int32_t target_position;    /* 目标位置 */
+    /* 实时数据 (通过PDO 100Hz更新) */
+    volatile double actual_position;    /* 实际位置 (用户单位) */
+    volatile double actual_velocity;    /* 实际速度 (用户单位/s) */
+    volatile int actual_speed_rpm;      /* 实际速度 (rpm) */
+    volatile int actual_torque;         /* 实际转矩 (0.001倍额定) */
+    volatile double target_velocity;    /* 目标速度 */
+    volatile double target_position;    /* 目标位置 */
     
     /* 控制参数 */
-    int32_t max_velocity;       /* 最大速度 */
-    int32_t max_acceleration;   /* 最大加速度 */
+    double max_velocity;        /* 最大速度 */
+    double max_acceleration;    /* 最大加速度 */
+    double unit_factor;         /* 用户单位转换系数 */
+    
+    /* 机械参数 */
+    double gear_ratio;          /* 减速比 (电机转数:轮子转数) */
+    double wheel_radius_mm;     /* 轮子半径 (mm) */
     
     /* 线程安全 */
     pthread_mutex_t mutex;
+    pthread_mutex_t data_mutex; /* 数据访问互斥锁 */
+    
+    /* 状态标志 */
     int initialized;
     int enabled;
+    int fault_reset_needed;     /* 需要故障复位 */
+    
+    /* 统计信息 */
+    uint64_t pdo_tx_count;      /* PDO发送计数 */
+    uint64_t pdo_rx_count;      /* PDO接收计数 */
+    uint64_t error_count;       /* 错误计数 */
 } MotorDriver_t;
 
 /******************************************************************************
@@ -80,22 +104,22 @@ typedef struct {
  ******************************************************************************/
 
 /**
- * @brief 初始化电机驱动
+ * @brief 初始化电机驱动和SDK
  * @param motor 电机驱动结构指针
  * @param node_id CAN节点ID
- * @param can_if CAN接口名称
+ * @param can_if CAN接口名称 (如 "can0")
  * @return ErrorCode_t
  */
 ErrorCode_t motor_init(MotorDriver_t *motor, uint8_t node_id, const char *can_if);
 
 /**
- * @brief 反初始化电机驱动
+ * @brief 反初始化电机驱动和SDK
  * @param motor 电机驱动结构指针
  */
 void motor_deinit(MotorDriver_t *motor);
 
 /**
- * @brief 使能电机
+ * @brief 使能电机 (CSV模式)
  * @param motor 电机驱动结构指针
  * @return ErrorCode_t
  */
@@ -117,15 +141,15 @@ ErrorCode_t motor_disable(MotorDriver_t *motor);
 ErrorCode_t motor_set_mode(MotorDriver_t *motor, MotorMode_t mode);
 
 /**
- * @brief 设置目标速度
+ * @brief 设置目标速度 (PDO方式, 100Hz实时)
  * @param motor 电机驱动结构指针
- * @param velocity 目标速度
+ * @param velocity 目标速度 (rpm)，支持浮点数
  * @return ErrorCode_t
  */
-ErrorCode_t motor_set_velocity(MotorDriver_t *motor, int32_t velocity);
+ErrorCode_t motor_set_velocity(MotorDriver_t *motor, float velocity);
 
 /**
- * @brief 设置目标位置
+ * @brief 设置目标位置 (PDO方式)
  * @param motor 电机驱动结构指针
  * @param position 目标位置
  * @return ErrorCode_t
@@ -135,7 +159,7 @@ ErrorCode_t motor_set_position(MotorDriver_t *motor, int32_t position);
 /**
  * @brief 读取实际速度
  * @param motor 电机驱动结构指针
- * @param velocity 速度输出指针
+ * @param velocity 速度输出指针 (rpm)
  * @return ErrorCode_t
  */
 ErrorCode_t motor_get_velocity(MotorDriver_t *motor, int32_t *velocity);
@@ -149,7 +173,29 @@ ErrorCode_t motor_get_velocity(MotorDriver_t *motor, int32_t *velocity);
 ErrorCode_t motor_get_position(MotorDriver_t *motor, int32_t *position);
 
 /**
- * @brief 更新电机状态（周期性调用）
+ * @brief 获取电机实际位置（以米为单位）
+ * @param motor 电机驱动结构指针
+ * @return 位置值（米）
+ */
+float motor_get_position_m(MotorDriver_t *motor);
+
+/**
+ * @brief 计算线速度（m/s）
+ * @param motor 电机驱动结构指针
+ * @param motor_rpm 电机转速（rpm）
+ * @return 线速度（m/s）
+ */
+float motor_calculate_linear_velocity(MotorDriver_t *motor, float motor_rpm);
+
+/**
+ * @brief 获取电机实际速度（以rpm为单位）
+ * @param motor 电机驱动结构指针
+ * @return 速度值（rpm）
+ */
+int32_t motor_get_velocity_rpm(MotorDriver_t *motor);
+
+/**
+ * @brief 更新电机状态 (100Hz周期性调用, 通过PDO读取)
  * @param motor 电机驱动结构指针
  * @return ErrorCode_t
  */
@@ -161,6 +207,13 @@ ErrorCode_t motor_update_state(MotorDriver_t *motor);
  * @return ErrorCode_t
  */
 ErrorCode_t motor_clear_fault(MotorDriver_t *motor);
+
+/**
+ * @brief 快速停止
+ * @param motor 电机驱动结构指针
+ * @return ErrorCode_t
+ */
+ErrorCode_t motor_fast_stop(MotorDriver_t *motor);
 
 /**
  * @brief 获取电机状态字符串
@@ -175,6 +228,16 @@ const char* motor_get_state_string(MotorState_t state);
  * @return 模式字符串
  */
 const char* motor_get_mode_string(MotorMode_t mode);
+
+/**
+ * @brief 获取电机统计信息
+ * @param motor 电机驱动结构指针
+ * @param tx_count PDO发送计数输出
+ * @param rx_count PDO接收计数输出
+ * @param err_count 错误计数输出
+ */
+void motor_get_statistics(MotorDriver_t *motor, uint64_t *tx_count, 
+                          uint64_t *rx_count, uint64_t *err_count);
 
 #ifdef __cplusplus
 }

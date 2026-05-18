@@ -283,12 +283,9 @@ static void calculate_control_output(GravityUnloadController_t *ctrl,
     }
     
     /* 步骤2: 计算电机目标速度 */
-    /* 电机角速度 = (V / R1 + C) * 编码器单位转换 */
+    /* 电机角速度 = (V / R1 + C)，单位：rpm */
     /* V是重物速度(m/s)，需要转换为电机速度指令 */
     float target_motor_speed = (filtered->velocity_m_s / ctrl->pulley_r1_m) * (1.0f + ctrl->motor_speed_compensation);
-    
-    /* 放大速度指令，确保电机能够转动 */
-    target_motor_speed *= 1000.0f;  /* 放大1000倍 */
     
     /* 使用PID控制器 */
     float pid_output = pid_update(&ctrl->pid, target_motor_speed, output->motor_velocity_actual);
@@ -422,13 +419,15 @@ static void* gravity_unload_thread(void *arg) {
         }
         
         /* 输出到执行器 */
-    set_motor_velocity(control_output.motor_velocity_cmd);
+    set_motor_velocity(-control_output.motor_velocity_cmd);  /* 负号反转电机方向 */
     set_clutch_current(control_output.clutch_current_mA);
     
-    /* 1Hz调试打印 */
-    uint32_t current_time = get_timestamp_ms();
-    if (current_time - last_print_time >= 1000) {
+    /* 1Hz调试打印并输出到文件供上位机读取 */
+        uint32_t current_time = get_timestamp_ms();
+        if (current_time - last_print_time >= 100) {  /* 改为10Hz输出 */
             last_print_time = current_time;
+            
+            /* 控制台输出 */
             printf("[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f I_clutch=%.1fmA V_motor=%.0f\n",
                    filtered_data.pressure_kg,
                    filtered_data.position_m,
@@ -436,6 +435,20 @@ static void* gravity_unload_thread(void *arg) {
                    filtered_data.velocity_m_s,
                    control_output.clutch_current_mA,
                    control_output.motor_velocity_cmd);
+            
+            /* 文件输出 - 供上位机GravShow读取 */
+            FILE *fp = fopen("/home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys/share/realtime_data.txt", "w");
+            if (fp != NULL) {
+                fprintf(fp, "[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f I_clutch=%.1fmA V_motor=%.0f\n",
+                        filtered_data.pressure_kg,
+                        filtered_data.position_m,
+                        filtered_data.velocity_raw_m_s,
+                        filtered_data.velocity_m_s,
+                        control_output.clutch_current_mA,
+                        control_output.motor_velocity_cmd);
+                fflush(fp);
+                fclose(fp);
+            }
         }
         
         /* 周期控制 */

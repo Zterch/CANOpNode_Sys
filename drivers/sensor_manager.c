@@ -1,11 +1,3 @@
-/******************************************************************************
- * @file    sensor_manager.c
- * @brief   统一传感器管理器实现 - RS485传感器轮询管理
- * @author  System Architect
- * @date    2026-04-23
- * @version 1.0.0
- ******************************************************************************/
-
 #define _GNU_SOURCE
 #include "sensor_manager.h"
 #include <string.h>
@@ -15,216 +7,87 @@
 #include <math.h>
 #include <termios.h>
 #include <fcntl.h>
+#include <limits.h>
+#include "../config/system_config.h"
 
-/* 外部函数声明 - 来自 rs485_bus.c */
-extern int serial_open(const char *device, int baudrate);
-extern int serial_configure(int fd, int baudrate, int data_bits, int stop_bits, char parity);
+/* 编码器参数 */
+static float s_rope_drum_diameter = 100.0f;
+static float s_rope_length_per_turn = 314.16f;
+static float s_rope_length_base = 0.0f;
+static uint32_t s_encoder_resolution = 4096;
+static uint32_t s_encoder_zero_offset = 0;
 
-/* 定义日志模块 */
-#define LOG_MODULE_SENSOR  LOG_MODULE_ENCODER  /* 复用编码器模块日志 */
-
-/* 定义 M_PI (如果未定义) */
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-/* 定义错误码 */
-#define ERR_DEV_NOT_FOUND  -3
-
-/******************************************************************************
- * 私有变量
- ******************************************************************************/
-
-/* 编码器绳子参数 */
-static float s_rope_drum_diameter = 100.0f;     /* 卷筒直径(mm) */
-static float s_rope_length_per_turn = 314.16f;  /* 每圈绳长(mm) */
-static float s_rope_length_base = 0.0f;         /* 基准长度(mm) */
-static uint32_t s_encoder_resolution = 4096;    /* 编码器分辨率 */
-static uint32_t s_encoder_zero_offset = 0;      /* 零点偏移 - 无符号32位整数 */
+/* 编码器数据校验参数 */
+static uint32_t s_last_valid_encoder = 0;
+static int s_encoder_first_read = 1;  /* 首次读取标志 */
+static int s_encoder_consecutive_errors = 0;
+#define ENCODER_MAX_DELTA_PER_CYCLE 10000
+#define ENCODER_ERROR_THRESHOLD 5
 
 /* 压力传感器参数 */
-static int16_t s_pressure_zero_offset = 0;      /* 压力传感器去皮偏移 */
+static int16_t s_pressure_zero_offset = 0;
 
-/* 数据文件路径 */
-#define ENCODER_DATA_FILE   "share/encoder_rope_data.txt"
-#define PRESSURE_DATA_FILE  "share/pressure_zero.txt"
+/* Modbus功能码 */
+#define MODBUS_READ_HOLDING 0x03
 
-/******************************************************************************
- * 辅助函数
- ******************************************************************************/
+/* 编码器数据文件路径 */
+#define ENCODER_DATA_FILE "/home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys/share/encoder_rope_data.txt"
+#define PRESSURE_DATA_FILE "/home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys/share/pressure_data.txt"
 
-/* 获取当前时间(微秒) */
+/* 日志模块 */
+#define LOG_MODULE_SENSOR "SENSOR"
+
+/* 获取微秒时间戳 */
 static uint64_t get_time_us(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000ULL + (uint64_t)ts.tv_nsec / 1000ULL;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (uint64_t)tv.tv_sec * 1000000 + tv.tv_usec;
 }
 
-/******************************************************************************
- * 数据文件加载/保存
- ******************************************************************************/
+/* 编码器最大值（数据手册规定范围 0~2147483647） */
+#define ENCODER_MAX_VALUE 2147483647U
+#define ENCODER_HALF_RANGE 1073741824  /* 2^30，半圈脉冲数 */
+#define ENCODER_FULL_SIGNED_RANGE 2147483648  /* 2^31，有符号范围 */
 
-/* 加载编码器绳长数据 */
-static int load_encoder_data(void) {
-    FILE *fp = fopen(ENCODER_DATA_FILE, "r");
-    if (fp == NULL) {
-        printf("[SENSOR] No encoder data file found, using defaults\n");
-        return -1;
+/* 计算两个uint32_t编码器值的差值（正确处理回绕）
+ * 编码器值在 0~2147483647 范围内循环
+ * 当值超过最大值时回绕到0
+ * 
+ * 原理：
+ * 1. 先计算有符号差值 delta = (int32_t)(current - last)
+ * 2. 如果 delta > 2^30 (半圈)，说明是负方向回绕，delta -= 2^31
+ * 3. 如果 delta < -2^30 (负半圈)，说明是正方向回绕，delta += 2^31
+ * 
+ * 这样可以把回绕导致的巨大差值映射回合理的范围
+ */
+static int32_t calculate_encoder_delta(uint32_t current, uint32_t last) {
+    /* 计算有符号差值 */
+    int32_t delta = (int32_t)(current - last);
+    
+    /* 处理负方向回绕：例如 current=2147483646, last=0
+     * delta = 2147483646 (很大，超过半圈)
+     * 实际应该是 -2 (负方向移动了2个脉冲)
+     */
+    if (delta > ENCODER_HALF_RANGE) {
+        delta -= ENCODER_FULL_SIGNED_RANGE;  /* 2147483646 - 2147483648 = -2 */
+    }
+    /* 处理正方向回绕：例如 current=1, last=2147483641
+     * delta = -2147483640 (很小，小于负半圈)
+     * 实际应该是 +8 (正方向移动了8个脉冲)
+     */
+    else if (delta < -ENCODER_HALF_RANGE) {
+        delta += ENCODER_FULL_SIGNED_RANGE;  /* -2147483640 + 2147483648 = +8 */
     }
     
-    char line[128];
-    while (fgets(line, sizeof(line), fp)) {
-        /* 跳过注释行 */
-        if (line[0] == '#') continue;
-        
-        /* 解析 BASE_LENGTH_MM */
-        if (strncmp(line, "BASE_LENGTH_MM=", 15) == 0) {
-            sscanf(line + 15, "%f", &s_rope_length_base);
-        }
-        /* 解析 ZERO_OFFSET */
-        else if (strncmp(line, "ZERO_OFFSET=", 12) == 0) {
-            sscanf(line + 12, "%u", &s_encoder_zero_offset);
-        }
-        /* 解析 DRUM_DIAMETER */
-        else if (strncmp(line, "DRUM_DIAMETER=", 14) == 0) {
-            sscanf(line + 14, "%f", &s_rope_drum_diameter);
-        }
-        /* 解析 ENCODER_RESOLUTION */
-        else if (strncmp(line, "ENCODER_RESOLUTION=", 19) == 0) {
-            sscanf(line + 19, "%u", &s_encoder_resolution);
-        }
-    }
-    
-    fclose(fp);
-    
-    /* 重新计算每圈绳长 */
-    s_rope_length_per_turn = M_PI * s_rope_drum_diameter;
-    
-    printf("[SENSOR] Loaded encoder data: base=%.2fmm, offset=%u, drum=%.2fmm, res=%u\n",
-           s_rope_length_base, s_encoder_zero_offset, s_rope_drum_diameter, s_encoder_resolution);
-    
-    return 0;
+    return delta;
 }
 
-/* 保存编码器绳长数据 */
-static int save_encoder_data(void) {
-    FILE *fp = fopen(ENCODER_DATA_FILE, "w");
-    if (fp == NULL) {
-        printf("[SENSOR] Failed to save encoder data\n");
-        return -1;
-    }
-    
-    time_t now = time(NULL);
-    struct tm *tm_info = localtime(&now);
-    char time_str[32];
-    strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
-    
-    fprintf(fp, "# Encoder Rope Length Data\n");
-    fprintf(fp, "# Saved at: %s\n", time_str);
-    fprintf(fp, "BASE_LENGTH_MM=%.4f\n", s_rope_length_base);
-    fprintf(fp, "ZERO_OFFSET=%u\n", s_encoder_zero_offset);
-    fprintf(fp, "DRUM_DIAMETER=%.4f\n", s_rope_drum_diameter);
-    fprintf(fp, "ENCODER_RESOLUTION=%u\n", s_encoder_resolution);
-    
-    fclose(fp);
-    
-    printf("[SENSOR] Saved encoder data: base=%.2fmm, offset=%u\n",
-           s_rope_length_base, s_encoder_zero_offset);
-    
-    return 0;
-}
-
-/* 加载压力传感器去皮数据 */
-static int load_pressure_data(void) {
-    FILE *fp = fopen(PRESSURE_DATA_FILE, "r");
-    if (fp == NULL) {
-        printf("[SENSOR] No pressure data file found, using zero offset\n");
-        return -1;
-    }
-    
-    char line[128];
-    while (fgets(line, sizeof(line), fp)) {
-        if (line[0] == '#') continue;
-        
-        if (strncmp(line, "ZERO_OFFSET=", 12) == 0) {
-            int temp;
-            sscanf(line + 12, "%d", &temp);
-            s_pressure_zero_offset = (int16_t)temp;
-        }
-    }
-    
-    fclose(fp);
-    
-    printf("[SENSOR] Loaded pressure zero offset: %d\n", s_pressure_zero_offset);
-    
-    return 0;
-}
-
-/* 保存压力传感器去皮数据 */
-static int save_pressure_data(void) {
-    FILE *fp = fopen(PRESSURE_DATA_FILE, "w");
-    if (fp == NULL) {
-        printf("[SENSOR] Failed to save pressure data\n");
-        return -1;
-    }
-    
-    time_t now = time(NULL);
-    struct tm *tm_info = localtime(&now);
-    char time_str[32];
-    strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
-    
-    fprintf(fp, "# Pressure Sensor Zero Data\n");
-    fprintf(fp, "# Saved at: %s\n", time_str);
-    fprintf(fp, "ZERO_OFFSET=%d\n", s_pressure_zero_offset);
-    
-    fclose(fp);
-    
-    printf("[SENSOR] Saved pressure zero offset: %d\n", s_pressure_zero_offset);
-    
-    return 0;
-}
-
-/* 计算Modbus CRC16 */
-static uint16_t calc_crc16(const uint8_t *data, uint16_t len) {
-    uint16_t crc = 0xFFFF;
-    for (uint16_t i = 0; i < len; i++) {
-        crc ^= data[i];
-        for (uint8_t j = 0; j < 8; j++) {
-            if (crc & 0x0001) {
-                crc >>= 1;
-                crc ^= 0xA001;
-            } else {
-                crc >>= 1;
-            }
-        }
-    }
-    return crc;
-}
-
-/* 清空串口接收缓冲区 */
-static void flush_rx_buffer(int fd) {
-    uint8_t tmp[256];
-    while (read(fd, tmp, sizeof(tmp)) > 0) {
-        /* 持续读取直到缓冲区为空 */
-    }
-}
-
-/******************************************************************************
- * Modbus RTU 通信函数
- ******************************************************************************/
-
-/* 发送Modbus请求并接收响应 */
-static ErrorCode_t modbus_read_registers(SensorManager_t *manager,
-                                          uint8_t slave_addr,
-                                          uint8_t func_code,
-                                          uint16_t reg_addr,
-                                          uint16_t reg_count,
-                                          uint8_t *rx_buf,
-                                          int *rx_len,
-                                          uint32_t timeout_ms) {
+/* Modbus读取保持寄存器 */
+static ErrorCode_t modbus_read_registers(SensorManager_t *manager, uint8_t slave_addr,
+                                          uint8_t func_code, uint16_t reg_addr,
+                                          uint16_t reg_count, uint8_t *rx_buf,
+                                          int *rx_len, int timeout_ms) {
     uint8_t tx_buf[8];
-    
-    /* 构建请求帧 */
     tx_buf[0] = slave_addr;
     tx_buf[1] = func_code;
     tx_buf[2] = (reg_addr >> 8) & 0xFF;
@@ -232,71 +95,32 @@ static ErrorCode_t modbus_read_registers(SensorManager_t *manager,
     tx_buf[4] = (reg_count >> 8) & 0xFF;
     tx_buf[5] = reg_count & 0xFF;
     
-    /* 计算CRC */
-    uint16_t crc = calc_crc16(tx_buf, 6);
+    uint16_t crc = crc16_modbus(tx_buf, 6);
     tx_buf[6] = crc & 0xFF;
     tx_buf[7] = (crc >> 8) & 0xFF;
     
-    /* 清空接收缓冲区 */
-    flush_rx_buffer(manager->rs485_fd);
+    pthread_mutex_lock(&manager->bus_mutex);
     
-    /* 帧间隔 (3.5字符时间 @115200bps ≈ 0.3ms, 取1ms安全) */
-    usleep(1000);
-    
-    /* 发送请求 */
-    if (write(manager->rs485_fd, tx_buf, 8) != 8) {
-        return ERR_COMM_FAIL;
-    }
-    tcflush(manager->rs485_fd, TCOFLUSH);
-    
-    /* 等待响应 */
-    usleep(2000);  /* 最小等待时间 */
-    
-    /* 接收数据 */
-    *rx_len = 0;
-    uint32_t elapsed_ms = 0;
-    
-    while (elapsed_ms < timeout_ms) {
-        int n = read(manager->rs485_fd, rx_buf + *rx_len, 256 - *rx_len);
-        if (n > 0) {
-            *rx_len += n;
-            
-            /* 检查是否接收完整 */
-            if (*rx_len >= 5) {
-                uint8_t expected_len;
-                if (func_code == 0x03 || func_code == 0x04) {
-                    expected_len = 5 + rx_buf[2];  /* 地址+功能码+字节数+数据+CRC */
-                } else {
-                    expected_len = 5;  /* 异常响应 */
-                }
-                
-                if (*rx_len >= expected_len) {
-                    break;
-                }
-            }
-        }
-        
-        usleep(1000);
-        elapsed_ms++;
+    ErrorCode_t ret = rs485_bus_send(tx_buf, 8, timeout_ms);
+    if (ret != ERR_OK) {
+        pthread_mutex_unlock(&manager->bus_mutex);
+        return ret;
     }
     
-    if (*rx_len < 5) {
-        return ERR_TIMEOUT;
-    }
+    ret = rs485_bus_receive(rx_buf, 16, rx_len, timeout_ms);
+    pthread_mutex_unlock(&manager->bus_mutex);
     
-    /* 验证响应 */
-    if (rx_buf[0] != slave_addr) {
-        return ERR_COMM_FAIL;
-    }
-    
-    if (rx_buf[1] != func_code) {
-        return ERR_COMM_FAIL;
+    if (ret != ERR_OK) {
+        return ret;
     }
     
     /* 验证CRC */
-    int data_len = *rx_len - 2;
+    if (*rx_len < 5) {
+        return ERR_COMM_FAIL;
+    }
+    
     uint16_t rx_crc = (rx_buf[*rx_len - 1] << 8) | rx_buf[*rx_len - 2];
-    uint16_t calc_crc = calc_crc16(rx_buf, data_len);
+    uint16_t calc_crc = crc16_modbus(rx_buf, *rx_len - 2);
     
     if (rx_crc != calc_crc) {
         return ERR_COMM_FAIL;
@@ -305,11 +129,7 @@ static ErrorCode_t modbus_read_registers(SensorManager_t *manager,
     return ERR_OK;
 }
 
-/******************************************************************************
- * 传感器数据解析
- ******************************************************************************/
-
-/* 读取并解析编码器数据 */
+/* 读取并解析编码器数据 - 工业级抗干扰版本 */
 static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
     uint8_t rx_buf[16];
     int rx_len;
@@ -325,54 +145,155 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
         return ret;
     }
     
-    /* 解析32位多圈值 (大端模式) */
-    if (rx_buf[2] == 4) {
-        /* 按无符号32位整数解析（编码器协议使用无符号） */
-        uint32_t multi_turn = ((uint32_t)rx_buf[3] << 24) |
-                              ((uint32_t)rx_buf[4] << 16) |
-                              ((uint32_t)rx_buf[5] << 8) |
-                              ((uint32_t)rx_buf[6]);
-        
-        /* 检查编码器数据合理性 - 允许完整无符号32位范围 */
-        /* 编码器取值范围: 0 ~ 4294967295 */
-        data->data.encoder.multi_turn_value = multi_turn;
-        
-        /* 计算角度 */
-        data->data.encoder.angle_deg = (float)multi_turn * 360.0f / (float)s_encoder_resolution;
-        
-        /* 计算绳子长度 - 正确处理uint32_t溢出/回绕
-         * 
-         * 关键：使用有符号32位整数计算差值，正确处理回绕！
-         * 
-         * 原理：两个uint32_t值相减，结果转为int32_t，
-         * 如果差值在 ±20亿以内，结果正确。
-         * 
-         * 公式: 绳长 = BASE_LENGTH_MM + (相对脉冲数 / 分辨率) × 每圈绳长
-         */
-        int32_t pulse_diff_signed = (int32_t)(multi_turn - s_encoder_zero_offset);
-        
-        /* 安全检查：如果差值过大，可能是异常数据 */
-        if (pulse_diff_signed > 1000000 || pulse_diff_signed < -1000000) {
-            printf("[SENSOR] WARNING: Pulse diff too large (%d), using 0\n", pulse_diff_signed);
-            pulse_diff_signed = 0;
-        }
-        
-        float relative_turns = (float)pulse_diff_signed / (float)s_encoder_resolution;
-        float relative_length_mm = relative_turns * s_rope_length_per_turn;
-        
-        /* 总绳长 = 基准长度 + 相对位移 */
-        data->data.encoder.rope_length_mm = s_rope_length_base + relative_length_mm;
-        
-        data->data_valid = 1;
-        data->last_read_us = get_time_us();
-        
-        return ERR_OK;
+    if (rx_buf[2] != 4) {
+        return ERR_COMM_FAIL;
     }
     
-    return ERR_COMM_FAIL;
+    /* 按无符号32位整数解析（手册确认） */
+    uint32_t multi_turn_first = ((uint32_t)rx_buf[3] << 24) |
+                                ((uint32_t)rx_buf[4] << 16) |
+                                ((uint32_t)rx_buf[5] << 8) |
+                                ((uint32_t)rx_buf[6]);
+    
+    /* 检查编码器值是否在有效范围 0~2147483647 */
+    if (multi_turn_first > 2147483647) {
+        printf("[SENSOR] Invalid encoder value: %u (out of range)\n", multi_turn_first);
+        return ERR_COMM_FAIL;
+    }
+    
+    /* 首次读取，建立基准 */
+    if (s_encoder_first_read) {
+        s_encoder_first_read = 0;
+        s_last_valid_encoder = multi_turn_first;
+        /* 如果当前zero_offset与读取值相差太远（超过1/4范围），
+         * 说明文件保存的零点与当前实际位置跨越了回绕边界，
+         * 需要重新校准zero_offset到当前值附近 */
+        uint32_t diff = (multi_turn_first > s_encoder_zero_offset) ? 
+                        (multi_turn_first - s_encoder_zero_offset) : 
+                        (s_encoder_zero_offset - multi_turn_first);
+        if (diff > ENCODER_MAX_VALUE / 4) {
+            printf("[SENSOR] Recalibrating zero_offset: old=%u, new=%u (diff=%u)\n", 
+                   s_encoder_zero_offset, multi_turn_first, diff);
+            s_encoder_zero_offset = multi_turn_first;
+            s_rope_length_base = 0.0f;
+        }
+        goto parse_data;
+    }
+    
+    /* 计算与上次有效值的差值 */
+    int32_t delta_from_last = calculate_encoder_delta(multi_turn_first, s_last_valid_encoder);
+    
+    /* 变化正常，接受数据 */
+    if (delta_from_last <= ENCODER_MAX_DELTA_PER_CYCLE && 
+        delta_from_last >= -ENCODER_MAX_DELTA_PER_CYCLE) {
+        s_last_valid_encoder = multi_turn_first;
+        s_encoder_consecutive_errors = 0;
+        goto parse_data;
+    }
+    
+    /* 检测到突变，重读验证 */
+    s_encoder_consecutive_errors++;
+    printf("[SENSOR] Suspicious jump: last=%u, current=%u, delta=%d\n",
+           s_last_valid_encoder, multi_turn_first, delta_from_last);
+    
+    usleep(5000);
+    
+    ret = modbus_read_registers(manager,
+                                 manager->configs[SENSOR_TYPE_ENCODER].slave_addr,
+                                 manager->configs[SENSOR_TYPE_ENCODER].func_code,
+                                 manager->configs[SENSOR_TYPE_ENCODER].reg_addr,
+                                 manager->configs[SENSOR_TYPE_ENCODER].reg_count,
+                                 rx_buf, &rx_len, 50);
+    
+    if (ret != ERR_OK) {
+        printf("[SENSOR] Retry failed, using last valid\n");
+        multi_turn_first = s_last_valid_encoder;
+        goto parse_data;
+    }
+    
+    if (rx_buf[2] != 4) {
+        multi_turn_first = s_last_valid_encoder;
+        goto parse_data;
+    }
+    
+    uint32_t multi_turn_second = ((uint32_t)rx_buf[3] << 24) |
+                                 ((uint32_t)rx_buf[4] << 16) |
+                                 ((uint32_t)rx_buf[5] << 8) |
+                                 ((uint32_t)rx_buf[6]);
+    
+    if (multi_turn_second > 2147483647) {
+        printf("[SENSOR] Retry invalid, using last valid\n");
+        multi_turn_first = s_last_valid_encoder;
+        goto parse_data;
+    }
+    
+    /* 关键修复：分析两次读取结果 */
+    int32_t delta_first_from_last = calculate_encoder_delta(multi_turn_first, s_last_valid_encoder);
+    int32_t delta_second_from_last = calculate_encoder_delta(multi_turn_second, s_last_valid_encoder);
+    
+    /* 判断哪次读取正确 */
+    int first_is_normal = (delta_first_from_last <= ENCODER_MAX_DELTA_PER_CYCLE && 
+                           delta_first_from_last >= -ENCODER_MAX_DELTA_PER_CYCLE);
+    int second_is_normal = (delta_second_from_last <= ENCODER_MAX_DELTA_PER_CYCLE && 
+                            delta_second_from_last >= -ENCODER_MAX_DELTA_PER_CYCLE);
+    
+    if (first_is_normal && !second_is_normal) {
+        /* 首次正常，重读异常 - 使用首次 */
+        printf("[SENSOR] First OK, second bad, using first: %u\n", multi_turn_first);
+        s_last_valid_encoder = multi_turn_first;
+        s_encoder_consecutive_errors = 0;
+    } else if (!first_is_normal && second_is_normal) {
+        /* 首次异常，重读正常 - 使用重读 */
+        printf("[SENSOR] First bad, second OK, using second: %u\n", multi_turn_second);
+        multi_turn_first = multi_turn_second;
+        s_last_valid_encoder = multi_turn_second;
+        s_encoder_consecutive_errors = 0;
+    } else if (first_is_normal && second_is_normal) {
+        /* 两次都正常（非常接近）- 使用第二次 */
+        printf("[SENSOR] Both OK, using second: %u\n", multi_turn_second);
+        multi_turn_first = multi_turn_second;
+        s_last_valid_encoder = multi_turn_second;
+        s_encoder_consecutive_errors = 0;
+    } else {
+        /* 两次都异常（都远离上次有效值） */
+        printf("[SENSOR] Both reads abnormal, using last valid: %u\n", s_last_valid_encoder);
+        
+        if (s_encoder_consecutive_errors >= ENCODER_ERROR_THRESHOLD) {
+            printf("[SENSOR] Too many errors, recalibrating...\n");
+            s_encoder_zero_offset = multi_turn_second;
+            s_rope_length_base = 0.0f;
+            s_last_valid_encoder = multi_turn_second;
+            s_encoder_consecutive_errors = 0;
+            multi_turn_first = multi_turn_second;
+        } else {
+            multi_turn_first = s_last_valid_encoder;
+        }
+    }
+
+parse_data:
+    /* 填充数据 */
+    data->data.encoder.multi_turn_value = multi_turn_first;
+    data->data.encoder.angle_deg = (float)multi_turn_first * 360.0f / (float)s_encoder_resolution;
+    
+    /* 计算相对于零点的脉冲差值（正确处理回绕） */
+    int32_t pulse_diff = calculate_encoder_delta(multi_turn_first, s_encoder_zero_offset);
+    
+    /* 只检查极端异常值（超过1000万脉冲 ≈ 2441圈） */
+    if (pulse_diff > 10000000 || pulse_diff < -10000000) {
+        printf("[SENSOR] WARNING: Extreme pulse diff: %d, using 0\n", pulse_diff);
+        pulse_diff = 0;
+    }
+    
+    float turns = (float)pulse_diff / (float)s_encoder_resolution;
+    data->data.encoder.rope_length_mm = s_rope_length_base + turns * s_rope_length_per_turn;
+    
+    data->data_valid = 1;
+    data->last_read_us = get_time_us();
+    
+    return ERR_OK;
 }
 
-/* 读取并解析压力传感器数据 */
+/* 读取压力传感器 */
 static ErrorCode_t read_pressure(SensorManager_t *manager, SensorData_t *data) {
     uint8_t rx_buf[16];
     int rx_len;
@@ -388,85 +309,121 @@ static ErrorCode_t read_pressure(SensorManager_t *manager, SensorData_t *data) {
         return ret;
     }
     
-    /* 解析16位压力值 (大端模式) - 数据为有符号整型 */
-    if (rx_buf[2] == 2) {
-        /* 先读取为无符号，再转换为有符号 */
-        uint16_t raw_u16 = ((uint16_t)rx_buf[3] << 8) | (uint16_t)rx_buf[4];
-        int16_t raw_s16 = (int16_t)raw_u16;  /* 关键：转换为有符号 */
-        
-        data->data.pressure.raw_value = raw_s16;
-        data->data.pressure.zero_offset = s_pressure_zero_offset;
-        
-        /* 应用去皮并转换为kg (2位小数) */
-        int16_t adjusted = raw_s16 - s_pressure_zero_offset;
-        data->data.pressure.pressure_kg = (float)adjusted / 100.0f;
-        
-        data->data_valid = 1;
-        data->last_read_us = get_time_us();
-        
-        return ERR_OK;
+    if (rx_buf[2] != 2) {
+        return ERR_COMM_FAIL;
     }
     
-    return ERR_COMM_FAIL;
+    int16_t raw_value = (int16_t)((rx_buf[3] << 8) | rx_buf[4]);
+    
+    /* 根据传感器配置的小数点位数计算压力值 */
+    float divisor = 1.0f;
+    uint8_t decimal_places = manager->configs[SENSOR_TYPE_PRESSURE].decimal_places;
+    for (uint8_t i = 0; i < decimal_places; i++) {
+        divisor *= 10.0f;
+    }
+    
+    float pressure_kg = ((float)(raw_value - s_pressure_zero_offset)) / divisor;
+    
+    data->data.pressure.raw_value = raw_value;
+    data->data.pressure.pressure_kg = pressure_kg;
+    data->data_valid = 1;
+    data->last_read_us = get_time_us();
+    
+    return ERR_OK;
 }
 
-/******************************************************************************
- * 管理线程
- ******************************************************************************/
-
-static void* sensor_manager_thread(void* arg) {
-    SensorManager_t *manager = (SensorManager_t*)arg;
-    
-    LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager thread started (50Hz)");
-    
-    manager->running = 1;
+/* 传感器采集线程 */
+static void* sensor_thread(void* arg) {
+    SensorManager_t* manager = (SensorManager_t*)arg;
     
     while (manager->running) {
-        uint64_t cycle_start = get_time_us();
-        manager->cycle_count++;
-        
-        /* === 时间片1: 读取编码器 (0-6ms) === */
-        pthread_mutex_lock(&manager->bus_mutex);
-        
-        if (read_encoder(manager, &manager->datas[SENSOR_TYPE_ENCODER]) == ERR_OK) {
-            manager->datas[SENSOR_TYPE_ENCODER].read_count++;
-        } else {
+        /* 读取编码器 */
+        ErrorCode_t ret = read_encoder(manager, &manager->datas[SENSOR_TYPE_ENCODER]);
+        if (ret != ERR_OK) {
             manager->datas[SENSOR_TYPE_ENCODER].error_count++;
-            manager->total_errors++;
-        }
-        
-        pthread_mutex_unlock(&manager->bus_mutex);
-        
-        /* === 时间片2: 读取压力传感器 (6-12ms) === */
-        pthread_mutex_lock(&manager->bus_mutex);
-        
-        if (read_pressure(manager, &manager->datas[SENSOR_TYPE_PRESSURE]) == ERR_OK) {
-            manager->datas[SENSOR_TYPE_PRESSURE].read_count++;
         } else {
+            manager->datas[SENSOR_TYPE_ENCODER].read_count++;
+        }
+        
+        /* 读取压力 */
+        ret = read_pressure(manager, &manager->datas[SENSOR_TYPE_PRESSURE]);
+        if (ret != ERR_OK) {
             manager->datas[SENSOR_TYPE_PRESSURE].error_count++;
-            manager->total_errors++;
+        } else {
+            manager->datas[SENSOR_TYPE_PRESSURE].read_count++;
         }
         
-        pthread_mutex_unlock(&manager->bus_mutex);
-        
-        /* === 等待完成20ms周期 === */
-        uint64_t cycle_elapsed = get_time_us() - cycle_start;
-        int64_t sleep_us = 20000 - (int64_t)cycle_elapsed;  /* 20ms = 20000us */
-        
-        if (sleep_us > 0) {
-            usleep((useconds_t)sleep_us);
-        }
+        manager->cycle_count++;
+        usleep(10000); /* 10ms = 100Hz */
     }
-    
-    LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager thread stopped");
     
     return NULL;
 }
 
-/******************************************************************************
- * 公共接口实现
- ******************************************************************************/
+/* 加载编码器数据 */
+static int load_encoder_data(void) {
+    FILE *fp = fopen(ENCODER_DATA_FILE, "r");
+    if (fp == NULL) {
+        printf("[SENSOR] No encoder data file\n");
+        return -1;
+    }
+    
+    char line[128];
+    float saved_length = 0.0f;
+    uint32_t saved_encoder = 0;
+    int has_data = 0;
+    
+    while (fgets(line, sizeof(line), fp)) {
+        if (line[0] == '#') continue;
+        
+        if (strncmp(line, "ABSOLUTE_LENGTH_MM=", 19) == 0) {
+            sscanf(line + 19, "%f", &saved_length);
+            has_data = 1;
+        }
+        else if (strncmp(line, "LAST_ENCODER_VALUE=", 19) == 0) {
+            sscanf(line + 19, "%u", &saved_encoder);
+            has_data = 1;
+        }
+        else if (strncmp(line, "DRUM_DIAMETER=", 14) == 0) {
+            sscanf(line + 14, "%f", &s_rope_drum_diameter);
+        }
+        else if (strncmp(line, "ENCODER_RESOLUTION=", 19) == 0) {
+            sscanf(line + 19, "%u", &s_encoder_resolution);
+        }
+    }
+    
+    fclose(fp);
+    
+    s_rope_length_per_turn = M_PI * s_rope_drum_diameter;
+    
+    if (has_data) {
+        printf("[SENSOR] Loaded: length=%.2fmm, encoder=%u\n", saved_length, saved_encoder);
+        s_rope_length_base = saved_length;
+        s_encoder_zero_offset = saved_encoder;
+    }
+    
+    return 0;
+}
 
+/* 保存编码器数据 */
+static int save_encoder_data(uint32_t encoder_value, float absolute_length) {
+    FILE *fp = fopen(ENCODER_DATA_FILE, "w");
+    if (fp == NULL) {
+        return -1;
+    }
+    
+    fprintf(fp, "# Encoder Rope Length Data\n");
+    fprintf(fp, "ABSOLUTE_LENGTH_MM=%.4f\n", absolute_length);
+    fprintf(fp, "LAST_ENCODER_VALUE=%u\n", encoder_value);
+    fprintf(fp, "DRUM_DIAMETER=%.4f\n", s_rope_drum_diameter);
+    fprintf(fp, "ENCODER_RESOLUTION=%u\n", s_encoder_resolution);
+    
+    fclose(fp);
+    printf("[SENSOR] Saved: length=%.2fmm, encoder=%u\n", absolute_length, encoder_value);
+    return 0;
+}
+
+/* 初始化传感器管理器 */
 ErrorCode_t sensor_mgr_init(SensorManager_t *manager, const char *device, int baudrate) {
     if (manager == NULL || device == NULL) {
         return ERR_INVALID_PARAM;
@@ -474,190 +431,116 @@ ErrorCode_t sensor_mgr_init(SensorManager_t *manager, const char *device, int ba
     
     memset(manager, 0, sizeof(SensorManager_t));
     
-    /* 初始化编码器配置 */
-    manager->configs[SENSOR_TYPE_ENCODER].type = SENSOR_TYPE_ENCODER;
-    manager->configs[SENSOR_TYPE_ENCODER].slave_addr = 2;       /* 编码器地址 */
-    manager->configs[SENSOR_TYPE_ENCODER].reg_addr = 0x0000;    /* 多圈值寄存器 */
-    manager->configs[SENSOR_TYPE_ENCODER].reg_count = 2;        /* 2个寄存器 = 4字节 */
-    manager->configs[SENSOR_TYPE_ENCODER].func_code = 0x03;
-    manager->configs[SENSOR_TYPE_ENCODER].read_timeout_ms = 50;
+    /* 初始化互斥锁 */
+    pthread_mutex_init(&manager->bus_mutex, NULL);
+    
+    /* 配置编码器 */
+    manager->configs[SENSOR_TYPE_ENCODER].slave_addr = ENCODER_SLAVE_ADDR;
+    manager->configs[SENSOR_TYPE_ENCODER].func_code = ENCODER_MODBUS_FUNC_CODE;
+    manager->configs[SENSOR_TYPE_ENCODER].reg_addr = ENCODER_MODBUS_REG_ADDR;
+    manager->configs[SENSOR_TYPE_ENCODER].reg_count = 2;
     manager->configs[SENSOR_TYPE_ENCODER].name = "Encoder";
     
-    /* 初始化压力传感器配置 */
-    manager->configs[SENSOR_TYPE_PRESSURE].type = SENSOR_TYPE_PRESSURE;
-    manager->configs[SENSOR_TYPE_PRESSURE].slave_addr = 1;      /* 压力传感器地址 */
-    manager->configs[SENSOR_TYPE_PRESSURE].reg_addr = 0x0000;   /* 压力值寄存器 */
-    manager->configs[SENSOR_TYPE_PRESSURE].reg_count = 1;       /* 1个寄存器 = 2字节 */
-    manager->configs[SENSOR_TYPE_PRESSURE].func_code = 0x03;
-    manager->configs[SENSOR_TYPE_PRESSURE].read_timeout_ms = 50;
+    /* 配置压力传感器 */
+    manager->configs[SENSOR_TYPE_PRESSURE].slave_addr = PRESSURE_SLAVE_ADDR;
+    manager->configs[SENSOR_TYPE_PRESSURE].func_code = 0x03;  /* 读取保持寄存器 */
+    manager->configs[SENSOR_TYPE_PRESSURE].reg_addr = 0x0000;  /* 压力值寄存器 */
+    manager->configs[SENSOR_TYPE_PRESSURE].reg_count = 1;
+    manager->configs[SENSOR_TYPE_PRESSURE].decimal_places = 2;  /* 2位小数 = 0.01kg分辨率 */
     manager->configs[SENSOR_TYPE_PRESSURE].name = "Pressure";
-    
-    /* 初始化互斥锁 */
-    if (pthread_mutex_init(&manager->bus_mutex, NULL) != 0) {
-        return ERR_GENERAL;
-    }
-    
-    /* 打开RS485串口 */
-    manager->rs485_fd = serial_open(device, baudrate);
-    if (manager->rs485_fd < 0) {
-        pthread_mutex_destroy(&manager->bus_mutex);
-        return ERR_DEV_NOT_FOUND;
-    }
-    
-    /* 配置串口参数 */
-    if (serial_configure(manager->rs485_fd, baudrate, 8, 1, 'N') != 0) {
-        close(manager->rs485_fd);
-        pthread_mutex_destroy(&manager->bus_mutex);
-        return ERR_GENERAL;
-    }
-    
-    manager->initialized = 1;
     
     /* 加载保存的数据 */
     load_encoder_data();
-    load_pressure_data();
     
-    LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager initialized");
-    LOG_INFO(LOG_MODULE_SENSOR, "  Encoder: addr=%d, reg=0x%04X",
-             manager->configs[SENSOR_TYPE_ENCODER].slave_addr,
-             manager->configs[SENSOR_TYPE_ENCODER].reg_addr);
-    LOG_INFO(LOG_MODULE_SENSOR, "  Pressure: addr=%d, reg=0x%04X",
-             manager->configs[SENSOR_TYPE_PRESSURE].slave_addr,
-             manager->configs[SENSOR_TYPE_PRESSURE].reg_addr);
+    /* 初始化RS485 */
+    ErrorCode_t ret = rs485_bus_init(device, baudrate);
+    if (ret != ERR_OK) {
+        printf("[SENSOR] Failed to init RS485: %d\n", ret);
+        return ret;
+    }
+    
+    manager->rs485_fd = rs485_bus_get_fd();
+    manager->initialized = 1;
+    printf("[SENSOR] Initialized\n");
     
     return ERR_OK;
 }
 
+/* 启动传感器管理器 */
+ErrorCode_t sensor_mgr_start(SensorManager_t *manager) {
+    if (manager == NULL || !manager->initialized) {
+        return ERR_NOT_INITIALIZED;
+    }
+    
+    manager->running = 1;
+    
+    if (pthread_create(&manager->manager_thread, NULL, sensor_thread, manager) != 0) {
+        return ERR_GENERAL;
+    }
+    
+    printf("[SENSOR] Started\n");
+    return ERR_OK;
+}
+
+/* 停止传感器管理器 */
+void sensor_mgr_stop(SensorManager_t *manager) {
+    if (manager == NULL || !manager->initialized) {
+        return;
+    }
+    
+    manager->running = 0;
+    pthread_join(manager->manager_thread, NULL);
+    
+    printf("[SENSOR] Stopped\n");
+}
+
+/* 反初始化 */
 void sensor_mgr_deinit(SensorManager_t *manager) {
     if (manager == NULL || !manager->initialized) {
         return;
     }
     
     /* 停止线程 */
-    sensor_mgr_stop(manager);
-    
-    /* 更新基准值 - 实现掉电记忆功能
-     * 
-     * 原理：保存当前的"总绳长"作为新的BASE_LENGTH_MM，
-     * 同时保存当前的编码器读数作为新的ZERO_OFFSET。
-     * 
-     * 下次启动时：
-     * - 相对脉冲 = 新读数 - ZERO_OFFSET ≈ 0
-     * - 绳长 = BASE_LENGTH_MM + 0 = BASE_LENGTH_MM ✓
-     * 
-     * 注意：这里保存的BASE_LENGTH_MM已经是"绝对绳长"，
-     * 下次计算时会加上相对位移（约等于0），不会重复累积。
-     */
-    SensorData_t *encoder_data = &manager->datas[SENSOR_TYPE_ENCODER];
-    if (encoder_data->data_valid) {
-        uint32_t current_multi_turn = encoder_data->data.encoder.multi_turn_value;
-        
-        /* 计算当前相对位移 - 使用有符号差值 */
-        int32_t pulse_diff_signed = (int32_t)(current_multi_turn - s_encoder_zero_offset);
-        
-        /* 安全检查 */
-        if (pulse_diff_signed > 1000000 || pulse_diff_signed < -1000000) {
-            printf("[SENSOR] WARNING: Save pulse diff too large (%d), skipping update\n", 
-                   pulse_diff_signed);
-            return;
-        }
-        
-        float relative_turns = (float)pulse_diff_signed / (float)s_encoder_resolution;
-        float relative_length = relative_turns * s_rope_length_per_turn;
-        
-        /* 新的BASE_LENGTH_MM = 原来的BASE + 相对位移长度
-         * 这是当前重物的绝对位置（从初始零点开始的总绳长）
-         */
-        float new_base_length = s_rope_length_base + relative_length;
-        
-        /* 限制BASE_LENGTH_MM的范围，防止异常值 */
-        if (new_base_length > 10000.0f || new_base_length < -10000.0f) {
-            printf("[SENSOR] WARNING: Base length out of range (%.2fmm), keeping old value\n", 
-                   new_base_length);
-        } else {
-            s_rope_length_base = new_base_length;
-            s_encoder_zero_offset = current_multi_turn;
-            
-            printf("[SENSOR] Updating encoder baseline: base=%.2fmm, offset=%u\n",
-                   s_rope_length_base, s_encoder_zero_offset);
-        }
-    }
-    
-    /* 保存数据 */
-    save_encoder_data();
-    save_pressure_data();
-    
-    /* 关闭串口 */
-    if (manager->rs485_fd >= 0) {
-        close(manager->rs485_fd);
-        manager->rs485_fd = -1;
-    }
-    
-    /* 销毁互斥锁 */
-    pthread_mutex_destroy(&manager->bus_mutex);
-    
-    manager->initialized = 0;
-    
-    LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager deinitialized");
-}
-
-ErrorCode_t sensor_mgr_start(SensorManager_t *manager) {
-    if (manager == NULL || !manager->initialized) {
-        return ERR_INVALID_PARAM;
-    }
-    
-    if (manager->running) {
-        return ERR_OK;  /* 已经在运行 */
-    }
-    
-    /* 创建管理线程 */
-    if (pthread_create(&manager->manager_thread, NULL, sensor_manager_thread, manager) != 0) {
-        return ERR_GENERAL;
-    }
-    
-    LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager thread started");
-    
-    return ERR_OK;
-}
-
-void sensor_mgr_stop(SensorManager_t *manager) {
-    if (manager == NULL || !manager->running) {
-        return;
-    }
-    
     manager->running = 0;
-    
-    /* 等待线程结束 */
     pthread_join(manager->manager_thread, NULL);
     
-    LOG_INFO(LOG_MODULE_SENSOR, "Sensor manager thread stopped");
+    /* 保存当前位置 */
+    SensorData_t *encoder_data = &manager->datas[SENSOR_TYPE_ENCODER];
+    if (encoder_data->data_valid) {
+        uint32_t current = encoder_data->data.encoder.multi_turn_value;
+        int32_t delta = calculate_encoder_delta(current, s_encoder_zero_offset);
+        float turns = (float)delta / (float)s_encoder_resolution;
+        float absolute = s_rope_length_base + turns * s_rope_length_per_turn;
+        save_encoder_data(current, absolute);
+    }
+    
+    rs485_bus_deinit();
+    pthread_mutex_destroy(&manager->bus_mutex);
+    manager->initialized = 0;
 }
 
+/* 获取传感器数据 */
 ErrorCode_t sensor_mgr_get_data(SensorManager_t *manager, SensorType_t type, SensorData_t *data) {
-    if (manager == NULL || !manager->initialized || data == NULL) {
+    if (manager == NULL || data == NULL || type >= SENSOR_TYPE_COUNT) {
         return ERR_INVALID_PARAM;
     }
     
-    if (type >= SENSOR_TYPE_COUNT) {
-        return ERR_INVALID_PARAM;
+    if (!manager->initialized) {
+        return ERR_NOT_INITIALIZED;
     }
     
-    /* 复制数据 */
     pthread_mutex_lock(&manager->bus_mutex);
-    memcpy(data, &manager->datas[type], sizeof(SensorData_t));
+    *data = manager->datas[type];
     pthread_mutex_unlock(&manager->bus_mutex);
     
     return ERR_OK;
 }
 
+/* 设置编码器绳子长度参数 */
 ErrorCode_t sensor_mgr_set_encoder_rope_params(SensorManager_t *manager, 
                                                 float drum_diameter, 
                                                 uint32_t resolution) {
-    if (manager == NULL || !manager->initialized) {
-        return ERR_INVALID_PARAM;
-    }
-    
-    if (drum_diameter <= 0 || resolution == 0) {
+    if (manager == NULL || drum_diameter <= 0 || resolution == 0) {
         return ERR_INVALID_PARAM;
     }
     
@@ -665,132 +548,102 @@ ErrorCode_t sensor_mgr_set_encoder_rope_params(SensorManager_t *manager,
     s_encoder_resolution = resolution;
     s_rope_length_per_turn = M_PI * drum_diameter;
     
-    LOG_INFO(LOG_MODULE_SENSOR, "Encoder rope params: drum=%.2fmm, resolution=%u, per_turn=%.2fmm",
-             drum_diameter, resolution, s_rope_length_per_turn);
-    
     return ERR_OK;
 }
 
+/* 执行编码器零点校准 */
 ErrorCode_t sensor_mgr_encoder_zero_calibration(SensorManager_t *manager) {
     if (manager == NULL || !manager->initialized) {
-        return ERR_INVALID_PARAM;
+        return ERR_NOT_INITIALIZED;
     }
     
-    /* 读取当前编码器值作为零点 */
     SensorData_t data;
-    
-    pthread_mutex_lock(&manager->bus_mutex);
-    ErrorCode_t ret = read_encoder(manager, &data);
-    pthread_mutex_unlock(&manager->bus_mutex);
-    
+    ErrorCode_t ret = sensor_mgr_get_data(manager, SENSOR_TYPE_ENCODER, &data);
     if (ret != ERR_OK) {
-        LOG_ERROR(LOG_MODULE_SENSOR, "Zero calibration failed: cannot read encoder");
         return ret;
     }
     
     s_encoder_zero_offset = data.data.encoder.multi_turn_value;
+    s_rope_length_base = 0.0f;
     
-    LOG_INFO(LOG_MODULE_SENSOR, "Zero calibration done: offset=%u", s_encoder_zero_offset);
-    
+    printf("[SENSOR] Encoder zero calibrated: offset=%u\n", s_encoder_zero_offset);
     return ERR_OK;
 }
 
+/* 执行压力传感器去皮/清零 */
 ErrorCode_t sensor_mgr_pressure_tare(SensorManager_t *manager) {
     if (manager == NULL || !manager->initialized) {
-        return ERR_INVALID_PARAM;
+        return ERR_NOT_INITIALIZED;
     }
     
-    /* 多次读取取平均值，提高去皮精度 */
-    int16_t sum = 0;
-    int valid_reads = 0;
-    
-    for (int i = 0; i < 5; i++) {
-        SensorData_t data;
-        pthread_mutex_lock(&manager->bus_mutex);
-        ErrorCode_t ret = read_pressure(manager, &data);
-        pthread_mutex_unlock(&manager->bus_mutex);
-        
-        if (ret == ERR_OK && data.data_valid) {
-            sum += data.data.pressure.raw_value;
-            valid_reads++;
-        }
-        usleep(100000); /* 100ms间隔 */
+    SensorData_t data;
+    ErrorCode_t ret = sensor_mgr_get_data(manager, SENSOR_TYPE_PRESSURE, &data);
+    if (ret != ERR_OK) {
+        return ret;
     }
     
-    if (valid_reads < 3) {
-        LOG_ERROR(LOG_MODULE_SENSOR, "Pressure tare failed: not enough valid readings");
-        return ERR_COMM_FAIL;
-    }
+    s_pressure_zero_offset = data.data.pressure.raw_value;
     
-    /* 计算平均原始值作为去皮偏移 */
-    s_pressure_zero_offset = sum / valid_reads;
-    
-    LOG_INFO(LOG_MODULE_SENSOR, "Pressure tare done: offset=%d, based on %d readings", 
-             s_pressure_zero_offset, valid_reads);
-    
-    /* 立即保存去皮值到文件 */
-    save_pressure_data();
-    
+    printf("[SENSOR] Pressure tared: offset=%d\n", s_pressure_zero_offset);
     return ERR_OK;
 }
 
+/* 设置编码器基准长度 */
 ErrorCode_t sensor_mgr_set_encoder_base_length(SensorManager_t *manager, float base_length_mm) {
-    if (manager == NULL || !manager->initialized) {
+    if (manager == NULL) {
         return ERR_INVALID_PARAM;
     }
     
     s_rope_length_base = base_length_mm;
-    save_encoder_data();  /* 立即保存到文件 */
-    
-    LOG_INFO(LOG_MODULE_SENSOR, "Encoder base length set to %.2fmm", base_length_mm);
-    
     return ERR_OK;
 }
 
+/* 获取传感器读取成功率 */
 float sensor_mgr_get_success_rate(SensorManager_t *manager, SensorType_t type) {
     if (manager == NULL || type >= SENSOR_TYPE_COUNT) {
         return 0.0f;
     }
     
-    uint32_t total = manager->datas[type].read_count + manager->datas[type].error_count;
+    uint32_t reads = manager->datas[type].read_count;
+    uint32_t errors = manager->datas[type].error_count;
+    uint32_t total = reads + errors;
     
     if (total == 0) {
         return 0.0f;
     }
     
-    return 100.0f * (float)manager->datas[type].read_count / (float)total;
+    return (float)reads * 100.0f / (float)total;
 }
 
+/* 打印所有传感器状态 */
 void sensor_mgr_print_status(SensorManager_t *manager) {
     if (manager == NULL) {
         return;
     }
     
     printf("\n=== Sensor Manager Status ===\n");
-    printf("Cycle count: %lu\n", (unsigned long)manager->cycle_count);
-    printf("Total errors: %lu\n", (unsigned long)manager->total_errors);
+    printf("Cycle count: %lu\n", manager->cycle_count);
+    printf("Total errors: %lu\n", manager->total_errors);
+    
+    const char* type_names[] = {"Encoder", "Pressure"};
     
     for (int i = 0; i < SENSOR_TYPE_COUNT; i++) {
-        SensorConfig_t *cfg = &manager->configs[i];
         SensorData_t *data = &manager->datas[i];
+        float success_rate = sensor_mgr_get_success_rate(manager, i);
         
-        printf("\n%s (addr=%d):\n", cfg->name, cfg->slave_addr);
-        printf("  Reads: %u, Errors: %u, Success: %.1f%%\n",
-               data->read_count, data->error_count,
-               sensor_mgr_get_success_rate(manager, i));
+        printf("\n%s (addr=%d):\n", type_names[i], manager->configs[i].slave_addr);
+        printf("  Reads: %lu, Errors: %lu, Success: %.1f%%\n",
+               data->read_count, data->error_count, success_rate);
         
-        if (data->data_valid) {
-            if (i == SENSOR_TYPE_ENCODER) {
-                printf("  Multi-turn: %u\n", data->data.encoder.multi_turn_value);
-                printf("  Angle: %.2f deg\n", data->data.encoder.angle_deg);
-                printf("  Rope: %.2f mm\n", data->data.encoder.rope_length_mm);
-            } else if (i == SENSOR_TYPE_PRESSURE) {
-                printf("  Pressure: %.3f kg (raw=%d, offset=%d)\n", 
-                       data->data.pressure.pressure_kg,
-                       data->data.pressure.raw_value,
-                       data->data.pressure.zero_offset);
-            }
+        if (i == SENSOR_TYPE_ENCODER && data->data_valid) {
+            printf("  Multi-turn: %u\n", data->data.encoder.multi_turn_value);
+            printf("  Angle: %.2f deg\n", data->data.encoder.angle_deg);
+            printf("  Rope: %.2f mm\n", data->data.encoder.rope_length_mm);
+        } else if (i == SENSOR_TYPE_PRESSURE && data->data_valid) {
+            printf("  Pressure: %.3f kg (raw=%d, offset=%d)\n",
+                   data->data.pressure.pressure_kg,
+                   data->data.pressure.raw_value,
+                   s_pressure_zero_offset);
         }
     }
-    printf("\n");
 }

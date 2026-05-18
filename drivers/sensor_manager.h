@@ -38,6 +38,7 @@ typedef struct {
     uint16_t reg_addr;          /* 寄存器起始地址 */
     uint16_t reg_count;         /* 寄存器数量 */
     uint8_t func_code;          /* 功能码 (0x03或0x04) */
+    uint8_t decimal_places;     /* 小数点位数 (用于压力传感器) */
     uint32_t read_timeout_ms;   /* 读取超时时间 */
     const char* name;           /* 设备名称 */
 } SensorConfig_t;
@@ -47,7 +48,7 @@ typedef struct {
     union {
         /* 编码器数据 */
         struct {
-            uint32_t multi_turn_value;      /* 多圈值 - 无符号32位整数 (0~4294967295) */
+            uint32_t multi_turn_value;      /* 多圈值 - 无符号32位整数 (0~2147483647) */
             float angle_deg;                /* 角度值 */
             float rope_length_mm;           /* 绳子长度 */
         } encoder;

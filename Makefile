@@ -1,13 +1,19 @@
 # CANOpNode_Sys Build System
 # Author: System Architect
-# Date: 2026-04-16
-# Version: 1.0.0
+# Date: 2026-05-12
+# Version: 2.0.0 - NiMotion SDK Integration
 
 # 编译器设置
 CC = gcc
 CFLAGS = -Wall -Wextra -O2 -pthread
 CFLAGS += -I./include -I./config -I./utils -I./drivers -I./algorithms
+CFLAGS += -I../NimServoSDK-MM-bin-linux-x64/inc
 CFLAGS += -D_GNU_SOURCE
+
+# SDK库路径
+SDK_PATH = ../NimServoSDK-MM-bin-linux-x64
+# 修改Makefile使用本地库
+SDK_LIB_PATH = ./lib
 
 # 调试模式
 DEBUG = 0
@@ -17,8 +23,19 @@ else
     CFLAGS += -DNDEBUG
 endif
 
-# 链接选项
+# 链接选项 - 链接SDK库 (注意库名大小写)
 LDFLAGS = -pthread -lm -lrt
+LDFLAGS += -L$(SDK_LIB_PATH) \
+           -lNimServoSDK \
+           -lNiMotionUSBCAN \
+           -lCANopenMaster \
+           -lAbstractMaster \
+           -lAbstractCanDevice \
+           -lGlobal \
+           -lDataBase \
+           -lNiMotionCanDevice \
+           -lTcpCanDevice
+LDFLAGS += -Wl,-rpath,$(SDK_LIB_PATH)
 
 # 目录设置
 BUILD_DIR = build
@@ -28,6 +45,7 @@ BIN_DIR = bin
 SOURCES = main.c \
           utils/logger.c \
           utils/thread_manager.c \
+          utils/shared_memory.c \
           algorithms/sine_wave.c \
           algorithms/signal_filter.c \
           algorithms/pid_controller.c \
@@ -94,28 +112,15 @@ uninstall:
 	@rm -f /usr/local/bin/CANOpNode_Sys
 	@echo "Uninstalled"
 
-# 测试程序
-test_encoder: dirs
-	$(CC) $(CFLAGS) -c test_encoder_multi_turn.c -o $(BUILD_DIR)/test_encoder_multi_turn.o
-	$(CC) $(BUILD_DIR)/test_encoder_multi_turn.o \
-	      $(BUILD_DIR)/utils/logger.o \
-	      $(BUILD_DIR)/drivers/encoder_driver.o \
-	      $(BUILD_DIR)/drivers/rs485_bus.o \
-	      -o $(BIN_DIR)/test_encoder $(LDFLAGS)
-	@echo "Test program built: $(BIN_DIR)/test_encoder"
-
-# 运行测试
-run_test_encoder: test_encoder
-	@sudo $(BIN_DIR)/test_encoder
-
-# 运行主程序
+# 运行主程序（设置LD_LIBRARY_PATH确保SDK能找到所有库）
 run: $(TARGET)
-	@sudo $(TARGET)
+	@echo "Running CANOpNode_Sys with LD_LIBRARY_PATH set to SDK directory..."
+	@LD_LIBRARY_PATH=$(SDK_LIB_PATH):$$LD_LIBRARY_PATH sudo $(TARGET)
 
 # 帮助
 help:
-	@echo "CANOpNode_Sys Build System"
-	@echo "=========================="
+	@echo "CANOpNode_Sys Build System v2.0"
+	@echo "==============================="
 	@echo "Targets:"
 	@echo "  all      - Build the project (default)"
 	@echo "  debug    - Build with debug symbols"

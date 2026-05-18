@@ -137,6 +137,9 @@ typedef enum {
     ERR_DEVICE_BUSY = -8,       /* 设备忙 */
     ERR_NOT_INITIALIZED = -9,   /* 未初始化 */
     ERR_ALREADY_INIT = -10,     /* 已初始化 */
+    ERR_THREAD_CREATE = -11,    /* 线程创建失败 */
+    ERR_INIT_FAIL = -12,        /* 初始化失败 */
+    ERR_OPERATION_NOT_ALLOWED = -13, /* 操作不允许 */
 } ErrorCode_t;
 
 /******************************************************************************
