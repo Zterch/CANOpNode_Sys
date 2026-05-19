@@ -18,6 +18,7 @@ extern int set_motor_velocity(float velocity);
 extern int set_clutch_current(float current_mA);
 extern int get_motor_actual_velocity(float *velocity);
 extern uint32_t get_timestamp_ms(void);
+extern void update_rope_velocity(float raw_velocity, float filtered_velocity);
 
 /******************************************************************************
  * 内部函数声明
@@ -422,6 +423,9 @@ static void* gravity_unload_thread(void *arg) {
     set_motor_velocity(-control_output.motor_velocity_cmd);  /* 负号反转电机方向 */
     set_clutch_current(control_output.clutch_current_mA);
     
+    /* 更新绳子速度到共享状态缓冲区 */
+    update_rope_velocity(filtered_data.velocity_raw_m_s, filtered_data.velocity_m_s);
+    
     /* 1Hz调试打印并输出到文件供上位机读取 */
         uint32_t current_time = get_timestamp_ms();
         if (current_time - last_print_time >= 1000) {  /* 1Hz输出 */
@@ -429,8 +433,8 @@ static void* gravity_unload_thread(void *arg) {
             
             /* 计算电机线速度 (电机转一圈对应的绳子移动距离考虑减速比) */
             /* 电机速度(rpm) -> 滑轮速度(rpm) -> 线速度(m/s) */
-            /* 减速比 3:1 (电机转3圈=滑轮转1圈) */
-            float pulley_speed_rpm = control_output.motor_velocity_cmd / 3.0f;
+            //换算到滑轮线速度，不考虑减速比
+            float pulley_speed_rpm = control_output.motor_velocity_cmd;
             float motor_linear_vel = (pulley_speed_rpm * 2.0f * 3.14159f * ctrl->pulley_r1_m) / 60.0f;
             
             /* 控制台输出 */

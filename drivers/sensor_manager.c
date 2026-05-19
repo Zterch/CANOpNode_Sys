@@ -139,7 +139,7 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
                                              manager->configs[SENSOR_TYPE_ENCODER].func_code,
                                              manager->configs[SENSOR_TYPE_ENCODER].reg_addr,
                                              manager->configs[SENSOR_TYPE_ENCODER].reg_count,
-                                             rx_buf, &rx_len, 50);
+                                             rx_buf, &rx_len, 5);
     
     if (ret != ERR_OK) {
         return ret;
@@ -273,7 +273,10 @@ static ErrorCode_t read_encoder(SensorManager_t *manager, SensorData_t *data) {
 parse_data:
     /* 填充数据 */
     data->data.encoder.multi_turn_value = multi_turn_first;
-    data->data.encoder.angle_deg = (float)multi_turn_first * 360.0f / (float)s_encoder_resolution;
+    
+    /* 计算单圈角度（取模运算得到单圈值） */
+    uint32_t single_turn_value = multi_turn_first % s_encoder_resolution;
+    data->data.encoder.angle_deg = (float)single_turn_value * 360.0f / (float)s_encoder_resolution;
     
     /* 计算相对于零点的脉冲差值（正确处理回绕） */
     int32_t pulse_diff = calculate_encoder_delta(multi_turn_first, s_encoder_zero_offset);
@@ -303,7 +306,7 @@ static ErrorCode_t read_pressure(SensorManager_t *manager, SensorData_t *data) {
                                              manager->configs[SENSOR_TYPE_PRESSURE].func_code,
                                              manager->configs[SENSOR_TYPE_PRESSURE].reg_addr,
                                              manager->configs[SENSOR_TYPE_PRESSURE].reg_count,
-                                             rx_buf, &rx_len, 50);
+                                             rx_buf, &rx_len, 5);
     
     if (ret != ERR_OK) {
         return ret;
@@ -336,6 +339,13 @@ static ErrorCode_t read_pressure(SensorManager_t *manager, SensorData_t *data) {
 static void* sensor_thread(void* arg) {
     SensorManager_t* manager = (SensorManager_t*)arg;
     
+    /* 设置线程高优先级，确保传感器采集实时性 */
+    struct sched_param param;
+    param.sched_priority = 88;  /* 高于数据采集线程(85) */
+    if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
+        printf("[SENSOR] Warning: Failed to set high priority for sensor thread\n");
+    }
+    
     while (manager->running) {
         /* 读取编码器 */
         ErrorCode_t ret = read_encoder(manager, &manager->datas[SENSOR_TYPE_ENCODER]);
@@ -354,7 +364,10 @@ static void* sensor_thread(void* arg) {
         }
         
         manager->cycle_count++;
-        usleep(10000); /* 10ms = 100Hz */
+        
+        /* 使用更短的延迟，让线程尽快完成循环 */
+        struct timespec delay = {0, 1000000}; /* 1ms延迟，主要让线程让出CPU */
+        nanosleep(&delay, NULL);
     }
     
     return NULL;
