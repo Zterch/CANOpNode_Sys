@@ -1,1 +1,1 @@
-[DATA] P=0.000kg Pos=0.000m V_raw=0.000 V_filt=0.000 I_clutch=50.0mA V_motor=0
+[DATA] P=0.000kg Pos=0.077m V_raw=0.000 V_filt=0.000 V_motor_linear=0.000 I_clutch=50.0mA V_motor_rpm=0.1

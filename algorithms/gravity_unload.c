@@ -283,9 +283,9 @@ static void calculate_control_output(GravityUnloadController_t *ctrl,
     }
     
     /* 步骤2: 计算电机目标速度 */
-    /* 电机角速度 = (V / R1 + C)，单位：rpm */
-    /* V是重物速度(m/s)，需要转换为电机速度指令 */
-    float target_motor_speed = (filtered->velocity_m_s / ctrl->pulley_r1_m) * (1.0f + ctrl->motor_speed_compensation);
+    /* 电机速度(rpm) = 滑轮转速(rpm) × 减速比 */
+    /*              = (V * 30 / πR1) × 3  (减速比3:1，电机转3圈滑轮转1圈) */
+    float target_motor_speed = (filtered->velocity_m_s / ctrl->pulley_r1_m) * (30.0f / 3.14159f) * 3.0f * (1.0f + ctrl->motor_speed_compensation);
     
     /* 使用PID控制器 */
     float pid_output = pid_update(&ctrl->pid, target_motor_speed, output->motor_velocity_actual);
@@ -424,26 +424,34 @@ static void* gravity_unload_thread(void *arg) {
     
     /* 1Hz调试打印并输出到文件供上位机读取 */
         uint32_t current_time = get_timestamp_ms();
-        if (current_time - last_print_time >= 100) {  /* 改为10Hz输出 */
+        if (current_time - last_print_time >= 1000) {  /* 1Hz输出 */
             last_print_time = current_time;
             
+            /* 计算电机线速度 (电机转一圈对应的绳子移动距离考虑减速比) */
+            /* 电机速度(rpm) -> 滑轮速度(rpm) -> 线速度(m/s) */
+            /* 减速比 3:1 (电机转3圈=滑轮转1圈) */
+            float pulley_speed_rpm = control_output.motor_velocity_cmd / 3.0f;
+            float motor_linear_vel = (pulley_speed_rpm * 2.0f * 3.14159f * ctrl->pulley_r1_m) / 60.0f;
+            
             /* 控制台输出 */
-            printf("[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f I_clutch=%.1fmA V_motor=%.0f\n",
+            printf("[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f V_motor_linear=%.3f I_clutch=%.1fmA V_motor_rpm=%.1f\n",
                    filtered_data.pressure_kg,
                    filtered_data.position_m,
                    filtered_data.velocity_raw_m_s,
                    filtered_data.velocity_m_s,
+                   motor_linear_vel,
                    control_output.clutch_current_mA,
                    control_output.motor_velocity_cmd);
             
             /* 文件输出 - 供上位机GravShow读取 */
             FILE *fp = fopen("/home/zterch/VS_Project/Nimo_COp_Prj/CANOpNode_Sys/share/realtime_data.txt", "w");
             if (fp != NULL) {
-                fprintf(fp, "[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f I_clutch=%.1fmA V_motor=%.0f\n",
+                fprintf(fp, "[DATA] P=%.3fkg Pos=%.3fm V_raw=%.3f V_filt=%.3f V_motor_linear=%.3f I_clutch=%.1fmA V_motor_rpm=%.1f\n",
                         filtered_data.pressure_kg,
                         filtered_data.position_m,
                         filtered_data.velocity_raw_m_s,
                         filtered_data.velocity_m_s,
+                        motor_linear_vel,
                         control_output.clutch_current_mA,
                         control_output.motor_velocity_cmd);
                 fflush(fp);

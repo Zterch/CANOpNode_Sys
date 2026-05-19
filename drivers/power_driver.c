@@ -311,10 +311,17 @@ ErrorCode_t power_set_current(PowerDriver_t *power, uint16_t current_ma) {
     
     if (ret == ERR_OK) {
         pthread_mutex_lock(&power->mutex);
+        uint16_t old_setpoint = power->current_setpoint;
         power->current_setpoint = current_ma;
         pthread_mutex_unlock(&power->mutex);
         
-        LOG_INFO(LOG_MODULE_POWER, "Current set to %d mA (%.2f A)", current_ma, current_ma / 1000.0f);
+        /* 只有当电流设置值发生明显变化时才打印日志（避免频繁输出） */
+        static uint32_t last_log_time = 0;
+        uint32_t now = get_timestamp_ms();
+        if (abs((int)current_ma - (int)old_setpoint) > 5 || (now - last_log_time) > 1000) {
+            LOG_INFO(LOG_MODULE_POWER, "Current set to %d mA (%.2f A)", current_ma, current_ma / 1000.0f);
+            last_log_time = now;
+        }
     } else {
         LOG_WARN(LOG_MODULE_POWER, "Failed to set current to %d mA", current_ma);
     }

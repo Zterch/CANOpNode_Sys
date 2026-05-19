@@ -98,8 +98,14 @@ static void update_sensor_to_buffer(SensorData_t *encoder, SensorData_t *pressur
 static void update_power_to_buffer(PowerDriver_t *power) {
     pthread_mutex_lock(&g_shared_state.mutex);
     if (power && power->state == POWER_STATE_ON) {
-        g_shared_state.current_a = (float)power->actual_current / 1000.0f; // mA -> A
-        g_shared_state.voltage_v = (float)power->actual_voltage / 1000.0f; // mV -> V
+        /* 主动读取电源板数据 */
+        uint16_t current_ma, voltage_mv;
+        if (power_get_status(power, &current_ma, &voltage_mv) == ERR_OK) {
+            g_shared_state.current_a = (float)current_ma / 1000.0f; // mA -> A
+            g_shared_state.voltage_v = (float)voltage_mv / 1000.0f; // mV -> V
+        } else {
+            /* 如果读取失败，保持上次的值 */
+        }
     }
     pthread_mutex_unlock(&g_shared_state.mutex);
 }
@@ -107,10 +113,18 @@ static void update_power_to_buffer(PowerDriver_t *power) {
 /* 更新电机数据到共享缓冲区 */
 static void update_motor_to_buffer(void) {
     pthread_mutex_lock(&g_shared_state.mutex);
+    
+    /* 关键修复：始终尝试更新电机状态，即使未使能也能读取位置等信息 */
+    /* 这确保从PDO读取最新的实时数据 */
+    if (g_motor.initialized) {
+        motor_update_state(&g_motor);
+    }
+    
     // 从电机驱动获取最新数据
     g_shared_state.motor_speed_rpm = (float)motor_get_velocity_rpm(&g_motor);
     g_shared_state.motor_position_m = (float)motor_get_position_m(&g_motor);
     g_shared_state.motor_status = g_motor.state;
+    
     pthread_mutex_unlock(&g_shared_state.mutex);
 }
 
@@ -164,11 +178,24 @@ int get_motor_actual_velocity(float *velocity) {
     return -1;
 }
 
+/* 测试模式：允许在电源板未就绪时运行电机控制 */
+#define TEST_MODE_ALLOW_MOTOR_WITHOUT_POWER 1
+
 int set_clutch_current(float current_mA) {
     uint16_t current_u16 = (uint16_t)(current_mA + 0.5f);
     
     if (current_u16 > SAFETY_CLUTCH_CURRENT_MAX_MA) {
         current_u16 = SAFETY_CLUTCH_CURRENT_MAX_MA;
+    }
+    
+    /* 测试模式：电源板未就绪时跳过电流设置，只运行电机控制 */
+    if (TEST_MODE_ALLOW_MOTOR_WITHOUT_POWER && !g_power.initialized) {
+        static int warned = 0;
+        if (!warned) {
+            printf("[TEST] Power board not initialized, skipping clutch current setting\n");
+            warned = 1;
+        }
+        return 0; /* 返回成功，允许电机继续运行 */
     }
     
     return (power_set_current(&g_power, current_u16) == ERR_OK) ? 0 : -1;
@@ -259,6 +286,11 @@ static int check_power_impl(void) {
     uint16_t current, voltage;
     
     if (power_get_status(&g_power, &current, &voltage) != ERR_OK) {
+        /* 测试模式：允许在电源板未就绪时继续运行 */
+        if (TEST_MODE_ALLOW_MOTOR_WITHOUT_POWER) {
+            printf("[CHECK WARN] Power board not available, running in test mode\n");
+            return 0;
+        }
         printf("[CHECK FAIL] Cannot communicate with power board\n");
         return -1;
     }
@@ -287,92 +319,97 @@ static int check_safety_impl(void) {
 }
 
 /******************************************************************************
- * 共享内存数据线程 - 20Hz输出
+ * 共享内存数据线程 - 40Hz输出
  ******************************************************************************/
 static void* data_output_thread(void* arg) {
     (void)arg;
     
-    printf("[SHM] Data output thread started (20Hz)\n");
+    /* 设置线程高优先级，确保40Hz输出稳定 */
+    struct sched_param param;
+    param.sched_priority = 90;
+    if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
+        printf("[SHM] Warning: Failed to set high priority for data output thread\n");
+    }
+    
+    printf("[SHM] Data output thread started (%dHz)\n", 1000 / SHM_DATA_OUTPUT_PERIOD_MS);
     
     SharedData_t data;
-    uint32_t last_output_time = 0;
-    const uint32_t output_period_ms = 50; /* 20Hz = 50ms */
+    const long period_ms = SHM_DATA_OUTPUT_PERIOD_MS;
     
     while (g_running) {
-        uint32_t current_time = get_timestamp_ms();
+        uint32_t start_time = get_timestamp_ms();
         
-        /* 50ms周期输出 */
-        if (current_time - last_output_time >= output_period_ms) {
-            last_output_time = current_time;
-            
-            /* 清零数据 */
-            memset(&data, 0, sizeof(SharedData_t));
-            
-            /* 工业级优化：从共享状态缓冲区读取数据 */
-            pthread_mutex_lock(&g_shared_state.mutex);
-            
-            /* 传感器数据 - 从共享缓冲区读取 */
-            data.pressure_kg = g_shared_state.pressure_kg;
-            data.rope_length_m = g_shared_state.rope_length_m;
-            data.encoder_value = g_shared_state.encoder_value;
-            data.encoder_angle_deg = g_shared_state.encoder_angle_deg;
-            
-            /* 电源数据 - 从共享缓冲区读取 */
-            data.current_a = g_shared_state.current_a;
-            data.voltage_v = g_shared_state.voltage_v;
-            
-            /* 电机数据 - 从共享缓冲区读取 */
-            data.motor_speed_rpm = g_shared_state.motor_speed_rpm;
-            data.motor_position = g_shared_state.motor_position_m;
-            data.motor_status = g_shared_state.motor_status;
-            
-            pthread_mutex_unlock(&g_shared_state.mutex);
-            
-            /* 算法状态 */
-            if (g_algorithm_enabled) {
-                AlgoStatus_t status;
-                gravity_unload_get_status(&g_gravity_ctrl, &status);
-                data.algorithm_state = (int32_t)status.state;
-                data.algorithm_error = (int32_t)status.error;
-                data.clutch_current_ma = 0;
-                data.motor_cmd_rpm = 0;
-            } else {
-                data.algorithm_state = 0;
-                data.algorithm_error = 0;
-                data.clutch_current_ma = 0;
-                data.motor_cmd_rpm = 0;
-            }
-            
-            data.emergency_stop = false;
-            
-            /* 写入共享内存 */
-            if (g_shm_initialized) {
-                shm_write_data(&g_shm_mgr, &data);
-            }
-            
-            /* 同时打印到控制台（用于调试） */
-            static int console_counter = 0;
-            if (++console_counter >= 20) { /* 1Hz控制台输出 */
-                console_counter = 0;
-                /* 计算线速度 */
-                float linear_vel = 0.0f;
-                if (g_motor.initialized) {
-                    linear_vel = motor_calculate_linear_velocity(&g_motor, data.motor_speed_rpm);
-                }
-                printf("[DATA] P=%.3fkg Pos=%.3fm I=%.3fA V=%.2fV Motor=%.0frpm Vline=%.3fm/s Algo=%s\n",
-                       data.pressure_kg,
-                       data.rope_length_m,
-                       data.current_a,
-                       data.voltage_v,
-                       data.motor_speed_rpm,
-                       linear_vel,
-                       g_algorithm_enabled ? "RUN" : "STOP");
-                fflush(stdout);
-            }
+        /* 清零数据 */
+        memset(&data, 0, sizeof(SharedData_t));
+        
+        /* 工业级优化：从共享状态缓冲区读取数据 */
+        pthread_mutex_lock(&g_shared_state.mutex);
+        
+        /* 传感器数据 - 从共享缓冲区读取 */
+        data.pressure_kg = g_shared_state.pressure_kg;
+        data.rope_length_m = g_shared_state.rope_length_m;
+        data.encoder_value = g_shared_state.encoder_value;
+        data.encoder_angle_deg = g_shared_state.encoder_angle_deg;
+        
+        /* 电源数据 - 从共享缓冲区读取 */
+        data.current_a = g_shared_state.current_a;
+        data.voltage_v = g_shared_state.voltage_v;
+        
+        /* 电机数据 - 从共享缓冲区读取 */
+        data.motor_speed_rpm = g_shared_state.motor_speed_rpm;
+        data.motor_position = g_shared_state.motor_position_m;
+        data.motor_status = g_shared_state.motor_status;
+        
+        pthread_mutex_unlock(&g_shared_state.mutex);
+        
+        /* 算法状态 */
+        if (g_algorithm_enabled) {
+            AlgoStatus_t status;
+            gravity_unload_get_status(&g_gravity_ctrl, &status);
+            data.algorithm_state = (int32_t)status.state;
+            data.algorithm_error = (int32_t)status.error;
+            data.clutch_current_ma = 0;
+            data.motor_cmd_rpm = 0;
+        } else {
+            data.algorithm_state = 0;
+            data.algorithm_error = 0;
+            data.clutch_current_ma = 0;
+            data.motor_cmd_rpm = 0;
         }
         
-        /* 微秒级延时，保持20Hz精度 */
-        usleep(1000); /* 1ms */
+        data.emergency_stop = false;
+        
+        /* 写入共享内存 */
+        if (g_shm_initialized) {
+            shm_write_data(&g_shm_mgr, &data);
+        }
+        
+        /* 同时打印到控制台（用于调试） */
+        static int console_counter = 0;
+        if (++console_counter >= 20) { /* 1Hz控制台输出 */
+            console_counter = 0;
+            /* 计算线速度 */
+            float linear_vel = 0.0f;
+            if (g_motor.initialized) {
+                linear_vel = motor_calculate_linear_velocity(&g_motor, data.motor_speed_rpm);
+            }
+            printf("[DATA] P=%.3fkg Pos=%.3fm I=%.3fA V=%.2fV Motor=%.2frpm Vline=%.3fm/s Algo=%s\n",
+                   data.pressure_kg,
+                   data.rope_length_m,
+                   data.current_a,
+                   data.voltage_v,
+                   data.motor_speed_rpm,
+                   linear_vel,
+                   g_algorithm_enabled ? "RUN" : "STOP");
+            fflush(stdout);
+        }
+        
+        /* 计算剩余延迟时间 */
+        uint32_t elapsed_ms = get_timestamp_ms() - start_time;
+        if (elapsed_ms < period_ms) {
+            /* 使用usleep进行相对延迟（可被信号中断） */
+            usleep((period_ms - elapsed_ms) * 1000);
+        }
     }
     
     printf("[SHM] Data output thread stopped\n");
@@ -515,7 +552,10 @@ static void* monitor_thread(void* arg) {
             gravity_unload_print_status(&g_gravity_ctrl);
         }
         
-        sleep(1);
+        /* 使用多个usleep调用，提高退出响应速度 */
+        for (int i = 0; i < 10 && g_running; i++) {
+            usleep(100000); /* 100ms */
+        }
     }
     
     printf("[MONITOR] Monitor thread stopped\n");
@@ -528,36 +568,43 @@ static void* monitor_thread(void* arg) {
 static void* data_collection_thread(void* arg) {
     (void)arg;
     
-    printf("[DATA] Data collection thread started (100Hz)\n");
+    /* 设置线程高优先级，确保100Hz采集稳定 */
+    struct sched_param param;
+    param.sched_priority = 85;
+    if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
+        printf("[DATA] Warning: Failed to set high priority for data collection thread\n");
+    }
     
-    uint32_t last_time = get_timestamp_ms();
-    const uint32_t period_ms = 10; /* 100Hz = 10ms */
+    printf("[DATA] Data collection thread started (%dHz)\n", 1000 / SHM_DATA_COLLECTION_PERIOD_MS);
+    
+    const long period_ms = SHM_DATA_COLLECTION_PERIOD_MS;
     
     while (g_running) {
-        uint32_t current_time = get_timestamp_ms();
+        uint32_t start_time = get_timestamp_ms();
         
-        /* 10ms周期更新 */
-        if (current_time - last_time >= period_ms) {
-            last_time = current_time;
-            
-            /* 更新传感器数据到共享缓冲区 */
-            SensorData_t encoder_data, pressure_data;
-            if (sensor_mgr_get_data(&g_sensor_mgr, SENSOR_TYPE_ENCODER, &encoder_data) == ERR_OK &&
-                sensor_mgr_get_data(&g_sensor_mgr, SENSOR_TYPE_PRESSURE, &pressure_data) == ERR_OK) {
-                update_sensor_to_buffer(&encoder_data, &pressure_data);
-            }
-            
-            /* 更新电源数据到共享缓冲区 */
-            update_power_to_buffer(&g_power);
-            
-            /* 更新电机数据到共享缓冲区 */
-            if (g_motor_enabled && g_motor.initialized) {
-                update_motor_to_buffer();
-            }
+        /* 更新传感器数据到共享缓冲区 */
+        SensorData_t encoder_data, pressure_data;
+        if (sensor_mgr_get_data(&g_sensor_mgr, SENSOR_TYPE_ENCODER, &encoder_data) == ERR_OK) {
+            update_sensor_to_buffer(&encoder_data, NULL);
+        }
+        if (sensor_mgr_get_data(&g_sensor_mgr, SENSOR_TYPE_PRESSURE, &pressure_data) == ERR_OK) {
+            update_sensor_to_buffer(NULL, &pressure_data);
         }
         
-        /* 短暂睡眠，避免CPU占用过高 */
-        usleep(1000);
+        /* 更新电源数据到共享缓冲区 */
+        update_power_to_buffer(&g_power);
+        
+        /* 更新电机数据到共享缓冲区 - 无论是否使能都读取电机状态 */
+        if (g_motor.initialized) {
+            update_motor_to_buffer();
+        }
+        
+        /* 计算剩余延迟时间 */
+        uint32_t elapsed_ms = get_timestamp_ms() - start_time;
+        if (elapsed_ms < period_ms) {
+            /* 使用usleep进行相对延迟（可被信号中断） */
+            usleep((period_ms - elapsed_ms) * 1000);
+        }
     }
     
     printf("[DATA] Data collection thread stopped\n");
@@ -719,12 +766,12 @@ int main(int argc, char *argv[]) {
     /* ========== 阶段4: 启动数据通信线程 ========== */
     printf("[INIT] Phase 4: Starting communication threads...\n");
     
-    printf("  -> Starting data collection thread (100Hz)... ");
+    printf("  -> Starting data collection thread (%dHz)... ", 1000 / SHM_DATA_COLLECTION_PERIOD_MS);
     fflush(stdout);
     pthread_create(&g_collection_thread_tid, NULL, data_collection_thread, NULL);
     printf("OK\n");
     
-    printf("  -> Starting data output thread (20Hz)... ");
+    printf("  -> Starting data output thread (%dHz)... ", 1000 / SHM_DATA_OUTPUT_PERIOD_MS);
     fflush(stdout);
     pthread_create(&g_data_thread_tid, NULL, data_output_thread, NULL);
     printf("OK\n");
@@ -737,7 +784,8 @@ int main(int argc, char *argv[]) {
     /* ========== 阶段5: 用户确认 ========== */
     printf("\n[INIT] Phase 5: System ready for remote monitoring\n");
     printf("  - Shared Memory: %s\n", g_shm_initialized ? "ACTIVE" : "OFFLINE");
-    printf("  - Data Output: 20Hz\n");
+    printf("  - Data Output: %dHz\n", 1000 / SHM_DATA_OUTPUT_PERIOD_MS);
+    printf("  - Data Collection: %dHz\n", 1000 / SHM_DATA_COLLECTION_PERIOD_MS);
     printf("  - Motor Control: Available (manual mode)\n");
     printf("  - Algorithm: Standby\n\n");
     

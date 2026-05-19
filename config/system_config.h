@@ -99,9 +99,17 @@ extern "C" {
 /******************************************************************************
  * 系统运行参数
  ******************************************************************************/
-#define SYS_CONTROL_PERIOD_MS   10          /* 主控制周期 (ms) */
-#define SYS_LOG_PERIOD_MS       100         /* 日志输出周期 (ms) */
-#define SYS_DATA_RECORD_PERIOD_MS  10       /* 数据记录周期 (ms) */
+#define SYS_CONTROL_PERIOD_MS           10          /* 主控制周期 (ms) */
+#define SYS_LOG_PERIOD_MS               100         /* 日志输出周期 (ms) */
+#define SYS_DATA_RECORD_PERIOD_MS       10          /* 数据记录周期 (ms) */
+
+/* 共享内存通信参数 */
+#define SHM_DATA_OUTPUT_PERIOD_MS       25          /* 共享内存数据输出周期 (ms) - 默认20Hz */
+#define SHM_DATA_COLLECTION_PERIOD_MS   10          /* 数据采集周期 (ms) - 默认100Hz */
+
+/* 速度滤波参数 */
+#define SPEED_FILTER_WINDOW_SIZE        5           /* 速度移动平均滤波窗口大小 */
+#define SPEED_FILTER_ALPHA              0.8f        /* 速度低通滤波系数 0-1 */
 
 /* 演示模式参数 */
 #define DEMO_RUN_TIME_S         10          /* 演示运行时间 (秒) */

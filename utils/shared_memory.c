@@ -33,10 +33,11 @@
 
 /**
  * @brief 获取当前时间戳（微秒）
+ * 使用 CLOCK_REALTIME 获取 Unix epoch 时间戳，确保上位机可以正确转换为日期时间
  */
 static uint64_t get_timestamp_us(void) {
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts);
     return (uint64_t)(ts.tv_sec * 1000000ULL + ts.tv_nsec / 1000);
 }
 

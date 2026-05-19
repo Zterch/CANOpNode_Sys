@@ -8,41 +8,40 @@ Shared Memory Communication Enabled
 ========================================
 
 [INIT] Phase 1: Initializing hardware...
-  -> Sensor manager... [SENSOR] Loaded: length=47.63mm, encoder=623
-[2026-05-18 18:11:16]INFO [SYS] [rs485_bus.c:111] RS485 bus /dev/ttyUSB1 opened at 115200 baud
-[2026-05-18 18:11:16]INFO [SYS] [rs485_bus.c:197] RS485 bus initialized (device=/dev/ttyUSB1, baud=115200)
+  -> Sensor manager... [SENSOR] Loaded: length=0.00mm, encoder=0
+[2026-05-19 15:47:23]INFO [SYS] [rs485_bus.c:111] RS485 bus /dev/ttyUSB1 opened at 115200 baud
+[2026-05-19 15:47:23]INFO [SYS] [rs485_bus.c:197] RS485 bus initialized (device=/dev/ttyUSB1, baud=115200)
 [SENSOR] Initialized
 OK
-  -> Power driver... [2026-05-18 18:11:16]INFO [POWER] [power_driver.c:113] Serial port /dev/ttyUSB0 opened at 115200 baud
-[2026-05-18 18:11:16]INFO [POWER] [power_driver.c:275] Power driver initialized (device=/dev/ttyUSB0, baud=115200)
+  -> Power driver... [2026-05-19 15:47:23]INFO [POWER] [power_driver.c:113] Serial port /dev/ttyUSB0 opened at 115200 baud
+[2026-05-19 15:47:23]INFO [POWER] [power_driver.c:275] Power driver initialized (device=/dev/ttyUSB0, baud=115200)
 OK
-  -> Motor driver... [2026-05-18 18:11:16]INFO [MOTOR] [motor_driver.c:110] Initializing NiMotion SDK...
-[2026-05-18 18:11:16]INFO [MOTOR] [motor_driver.c:129] Changed to SDK lib directory: .
-"[2026-05-18 18:11:16.967] SDK init"
-"[2026-05-18 18:11:16.969] 0 : CANopen Master"
-"[2026-05-18 18:11:16.969] 1 : EtherCAT Master"
-"[2026-05-18 18:11:16.969] 2 : Modbus Master"
-[2026-05-18 18:11:16]INFO [MOTOR] [motor_driver.c:137] SDK initialized from lib directory
-"[2026-05-18 18:11:16.971] 1001 : NiMotion USB-CAN Device"
-"[2026-05-18 18:11:16.972] 1004 : NiMotion TCP-CAN Device"
-[2026-05-18 18:11:16]ERROR [MOTOR] [motor_driver.c:150] Nim_create_master returned null handle
-[2026-05-18 18:11:16]INFO [MOTOR] [motor_driver.c:156] SDK master created successfully, handle=0x00000000
-[2026-05-18 18:11:16]INFO [MOTOR] [motor_driver.c:164] Connection string: {"DevType": "1001", "DevIndex": 0, "Baudrate": 8, "PDOIntervalMS": 10, "SyncIntervalMS": 10}
-0483:0002 = 0x563fa7e48a10
-read from usb device faild: expectBytes=6, actualBytes=-110
-exec usb write and read faild"[2026-05-18 18:11:18.447] NiMotionCanDevice::open() failed on NiM_ClearBuffer"
-[2026-05-18 18:11:18]INFO [MOTOR] [motor_driver.c:177] SDK master running successfully
-[2026-05-18 18:11:18]INFO [MOTOR] [motor_driver.c:192] Scanning nodes...
-[2026-05-18 18:11:21]INFO [MOTOR] [motor_driver.c:212] Motor node 1 is online
-[2026-05-18 18:11:21]WARN [MOTOR] [motor_driver.c:216] Nim_load_params with full path failed
-[2026-05-18 18:11:21]INFO [MOTOR] [motor_driver.c:241] Motor driver initialized (Node ID=1, SDK mode)
+  -> Motor driver... [2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:110] Initializing NiMotion SDK...
+[2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:129] Changed to SDK lib directory: .
+"[2026-05-19 15:47:23.102] SDK init"
+"[2026-05-19 15:47:23.104] 0 : CANopen Master"
+"[2026-05-19 15:47:23.104] 1 : EtherCAT Master"
+"[2026-05-19 15:47:23.104] 2 : Modbus Master"
+[2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:137] SDK initialized from lib directory
+"[2026-05-19 15:47:23.107] 1001 : NiMotion USB-CAN Device"
+"[2026-05-19 15:47:23.107] 1004 : NiMotion TCP-CAN Device"
+[2026-05-19 15:47:23]ERROR [MOTOR] [motor_driver.c:150] Nim_create_master returned null handle
+[2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:156] SDK master created successfully, handle=0x00000000
+[2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:164] Connection string: {"DevType": "1001", "DevIndex": 0, "Baudrate": 8, "PDOIntervalMS": 10, "SyncIntervalMS": 10}
+0483:0002 = 0x561674c1ba10
+[2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:177] SDK master running successfully
+[2026-05-19 15:47:23]INFO [MOTOR] [motor_driver.c:192] Scanning nodes...
+[2026-05-19 15:47:26]INFO [MOTOR] [motor_driver.c:212] Motor node 1 is online
+[2026-05-19 15:47:26]WARN [MOTOR] [motor_driver.c:216] Nim_load_params with full path failed
+[2026-05-19 15:47:26]INFO [MOTOR] [motor_driver.c:241] Motor driver initialized (Node ID=1, SDK mode)
 OK
   -> Motor ready (will enable when needed)
   -> Starting sensor manager thread... [SENSOR] Started
 OK
   -> Waiting for sensors to stabilize... OK
-  -> Calibrating sensors... [SENSOR] Encoder zero calibrated: offset=640
-[SENSOR] Pressure tared: offset=519
+  -> Calibrating sensors... [SENSOR] Encoder zero calibrated: offset=0
+
+[SENSOR] Pressure tared: offset=534
 OK
 
 [INIT] Phase 2: Initializing shared memory...
@@ -51,168 +50,17 @@ OK (name=/gravshow_shm, size=4096)
 
 [INIT] Phase 3: System health check...
 [CHECK] Checking sensors...
-[CHECK PASS] Sensors OK (Pressure: 5.190 kg, Encoder: 0.000 m)
+[CHECK PASS] Sensors OK (Pressure: 5.340 kg, Encoder: 0.000 m)
 [CHECK] Checking motor communication... OK
 [CHECK PASS] Motor OK (NodeID=1)
-[CHECK PASS] Power board OK (9.58 V, 0.441 A)
+[CHECK FAIL] Cannot communicate with power board
 [CHECK PASS] Safety check OK
 
-[INIT] All system checks PASSED!
-
-[INIT] Phase 4: Starting communication threads...
-  -> Starting data collection thread (100Hz)... OK
-  -> Starting data output thread (20Hz)... [DATA] Data collection thread started (100Hz)
-OK
-  -> Starting command handler thread... [SHM] Data output thread started (20Hz)
-OK
-
-[INIT] Phase 5: System ready for remote monitoring
-  - Shared Memory: ACTIVE
-  - Data Output: 20Hz
-  - Motor Control: Available (manual mode)
-  - Algorithm: Standby
-
-Waiting for commands from GravShow...
-Or press Enter to start algorithm mode locally
-Press Ctrl+C to exit
-
-[SHM] Command handler thread started
-[INFO] Running in manual mode (remote control enabled)
-
-========================================
-System RUNNING
-Mode: MANUAL (Remote Control)
-Press Ctrl+C to stop
-========================================
-
-[DATA] P=-0.030kg Pos=0.001m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.050kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=100, pressure=0.030, motor=0
-[DATA] P=0.030kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.020kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[CMD] Received command id=1 type=4 value=0.00
-"[2026-05-18 18:11:31.562] Exec Nim_set_workMode faild, Motor is power on"
-"[2026-05-18 18:11:31.614] Exec Nim_set_workMode faild, Motor is power on"
-"[2026-05-18 18:11:31.666] Exec Nim_set_workMode faild, Motor is power on"
-[2026-05-18 18:11:31]ERROR [MOTOR] [motor_driver.c:432] Nim_set_workMode failed: Operation not allowed
-[2026-05-18 18:11:31]INFO [MOTOR] [motor_driver.c:291] Starting motor enable sequence (SDK)...
-[2026-05-18 18:11:31]INFO [MOTOR] [motor_driver.c:328] CSV mode set successfully
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=-1rpm Vline=-0.003m/s Algo=STOP
-[2026-05-18 18:11:32]INFO [MOTOR] [motor_driver.c:355] Status word after enable: 0x1637
-[2026-05-18 18:11:32]INFO [MOTOR] [motor_driver.c:361] SUCCESS: Motor enabled! Status word: 0x1637
-[CMD] Motor enable (mode: CSV) - OK
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=200, pressure=0.110, motor=0
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[CMD] Received command id=2 type=1 value=0.10
-[2026-05-18 18:11:38]WARN [MOTOR] [motor_driver.c:408] Cannot change mode while motor is enabled
-[2026-05-18 18:11:38]INFO [MOTOR] [motor_driver.c:471] Set velocity: 0.10 rpm (internal: 0.00)
-[CMD] Set motor velocity: 0.10 rpm (OK)
-[SHM] Data written, sequence=300, pressure=0.110, motor=0
-[DATA] P=0.110kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.090kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.090kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.090kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.080kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=400, pressure=0.080, motor=0
-[DATA] P=0.080kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.080kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=500, pressure=0.070, motor=0
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.050kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=600, pressure=0.050, motor=0
-[DATA] P=0.050kg Pos=0.004m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.050kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=700, pressure=0.030, motor=0
-[DATA] P=0.030kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.030kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.020kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.020kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.020kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=800, pressure=0.020, motor=0
-[DATA] P=0.020kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.010kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.010kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.010kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.010kg Pos=0.005m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=900, pressure=0.000, motor=0
-[DATA] P=0.000kg Pos=0.006m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[CMD] Received command id=1 type=4 value=0.00
-[2026-05-18 18:12:09]WARN [MOTOR] [motor_driver.c:408] Cannot change mode while motor is enabled
-[2026-05-18 18:12:09]INFO [MOTOR] [motor_driver.c:291] Starting motor enable sequence (SDK)...
-[2026-05-18 18:12:10]INFO [MOTOR] [motor_driver.c:328] CSV mode set successfully
-[DATA] P=0.050kg Pos=0.008m I=0.441A V=9.58V Motor=-2rpm Vline=-0.007m/s Algo=STOP
-[2026-05-18 18:12:10]INFO [MOTOR] [motor_driver.c:355] Status word after enable: 0x1637
-[2026-05-18 18:12:10]INFO [MOTOR] [motor_driver.c:361] SUCCESS: Motor enabled! Status word: 0x1637
-[CMD] Motor enable (mode: CSV) - OK
-[DATA] P=0.110kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.090kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.110kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=1000, pressure=0.090, motor=0
-[DATA] P=0.090kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.110kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.090kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[CMD] Received command id=2 type=1 value=0.10
-[2026-05-18 18:12:16]WARN [MOTOR] [motor_driver.c:408] Cannot change mode while motor is enabled
-[2026-05-18 18:12:16]INFO [MOTOR] [motor_driver.c:471] Set velocity: 0.10 rpm (internal: 0.00)
-[CMD] Set motor velocity: 0.10 rpm (OK)
-[DATA] P=0.090kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.090kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=1100, pressure=0.090, motor=0
-[DATA] P=0.090kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.080kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.080kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.080kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.080kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[SHM] Data written, sequence=1200, pressure=0.070, motor=0
-[DATA] P=0.070kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-[DATA] P=0.070kg Pos=0.008m I=0.441A V=9.58V Motor=0rpm Vline=0.000m/s Algo=STOP
-^C
-[INFO] Signal received, shutting down...
-[DATA] Data collection thread stopped
-[SHM] Data output thread stopped
-[SENSOR] Saved: length=7.90mm, encoder=743
-[SHM] Command handler thread stopped
-[2026-05-18 18:12:25]INFO [SYS] [rs485_bus.c:214] RS485 bus deinitialized
-[2026-05-18 18:12:25]INFO [POWER] [power_driver.c:296] Power driver deinitialized
-
-[SHUTDOWN] Stopping system...
-  -> Waiting for communication threads... OK
-  -> Stopping sensor manager... OK
-
-
-=== Sensor Manager Status ===
-Cycle count: 3528
-Total errors: 0
-
-Encoder (addr=2):
-  Reads: 3528, Errors: 0, Success: 100.0%
-  Multi-turn: 743
-  Angle: 65.30 deg
-  Rope: 7.90 mm
-
-Pressure (addr=1):
-  Reads: 3351, Errors: 177, Success: 95.0%
-  Pressure: 0.070 kg (raw=526, offset=519)
-  -> Closing shared memory... OK
-
-[System shutdown completed]
-libusb uninitialized"[2026-05-18 18:12:25.305] NiMotionCanDevice::close() failed on NiM_ResetCAN"
-libusb uninitialized"[2026-05-18 18:12:25.305] NiMotionCanDevice::close() failed on NiM_CloseDevice"
+[ERROR] System check FAILED! Please check hardware connections.
+[SENSOR] Stopped
+[2026-05-19 15:47:29]INFO [POWER] [power_driver.c:296] Power driver deinitialized
+[SENSOR] Saved: length=0.00mm, encoder=0
+[2026-05-19 15:47:29]INFO [SYS] [rs485_bus.c:214] RS485 bus deinitialized
+libusb uninitialized"[2026-05-19 15:47:29.260] NiMotionCanDevice::close() failed on NiM_ResetCAN"
+libusb uninitialized"[2026-05-19 15:47:29.260] NiMotionCanDevice::close() failed on NiM_CloseDevice"
 QThread: Destroyed while thread is still running

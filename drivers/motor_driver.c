@@ -468,7 +468,15 @@ ErrorCode_t motor_set_velocity(MotorDriver_t *motor, float velocity) {
     
     pthread_mutex_unlock(&motor->mutex);
     
-    LOG_INFO(LOG_MODULE_MOTOR, "Set velocity: %.2f rpm (internal: %.2f)", velocity, vel_rps);
+    /* 限制日志输出频率 - 只有速度变化超过阈值或超过一定时间才打印 */
+    static uint32_t last_log_time = 0;
+    static float last_velocity = 0.0f;
+    uint32_t now = get_timestamp_ms();
+    if (fabs(velocity - last_velocity) > 0.1f || (now - last_log_time) > 500) {
+        LOG_INFO(LOG_MODULE_MOTOR, "Set velocity: %.2f rpm (internal: %.2f)", velocity, vel_rps);
+        last_velocity = velocity;
+        last_log_time = now;
+    }
     
     return ERR_OK;
 }
@@ -544,8 +552,9 @@ float motor_get_position_m(MotorDriver_t *motor) {
     
     double pos;
     if (Nim_get_currentPosition(motor->sdk_master, motor->node_id, &pos, 0) == 0) {
-        /* 根据单位转换系数计算实际位置 */
-        return (float)(pos / motor->unit_factor);
+        /* 注意：NiMotion SDK的Nim_get_currentPosition返回的已经是用户单位（米） */
+        /* unit_factor已经在SDK内部处理，不需要额外转换 */
+        return (float)pos;
     }
     
     return 0.0f;
