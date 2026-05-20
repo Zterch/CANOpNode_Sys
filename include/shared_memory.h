@@ -67,6 +67,9 @@ typedef struct {
     bool algorithm_start;    // 启动算法标志
     bool algorithm_stop;     // 停止算法标志
     
+    bool data_log_start;     // 开始数据记录标志
+    bool data_log_stop;      // 停止数据记录标志
+    
 } SharedCommand_t;
 
 /**

@@ -72,7 +72,8 @@ typedef struct {
     float motor_speed_rpm;
     float motor_position_m;
     int32_t motor_status;
-    float motor_linear_velocity_m_s;
+    float motor_linear_velocity_m_s;       /* 电机实际线速度（电机轴侧） */
+    float motor_theory_linear_velocity_m_s; /* 电机理论线速度（根据重物速度计算） */
     /* 绳子速度数据 */
     float rope_velocity_raw_m_s;
     float rope_velocity_filtered_m_s;
@@ -121,13 +122,13 @@ static void update_motor_to_buffer(void) {
     g_shared_state.motor_position_m = (float)motor_get_position_m(&g_motor);
     g_shared_state.motor_status = g_motor.state;
     
-    // 计算电机线速度（电机轴侧，反映电机实际速度）
-    // 线速度 = π * D * 电机转速(rpm) / 60
-    // 注意：从电机实际转速计算线速度时，不需要除以减速比3
-    // 减速比已经在从重物速度计算电机目标转速时考虑过了
+    // 计算电机线速度（滑轮侧，与重物速度对应）
+    // 线速度 = π * D * (电机转速(rpm) / 减速比3) / 60
+    // 存入文件时需要除以减速比3，与重物速度在同一参考系
     float pulley_diameter_m = 0.2f; // 滑轮直径200mm
     float motor_speed_rpm = g_shared_state.motor_speed_rpm;
-    g_shared_state.motor_linear_velocity_m_s = 3.14159f * pulley_diameter_m * motor_speed_rpm / 60.0f;
+    float pulley_speed_rpm = motor_speed_rpm / 3.0f; // 减速比3:1
+    g_shared_state.motor_linear_velocity_m_s = 3.14159f * pulley_diameter_m * pulley_speed_rpm / 60.0f;
     
     pthread_mutex_unlock(&g_shared_state.mutex);
 }
@@ -200,6 +201,12 @@ void update_rope_velocity(float raw_velocity, float filtered_velocity) {
     pthread_mutex_lock(&g_shared_state.mutex);
     g_shared_state.rope_velocity_raw_m_s = raw_velocity;
     g_shared_state.rope_velocity_filtered_m_s = filtered_velocity;
+    pthread_mutex_unlock(&g_shared_state.mutex);
+}
+
+void update_motor_theory_velocity(float theory_velocity) {
+    pthread_mutex_lock(&g_shared_state.mutex);
+    g_shared_state.motor_theory_linear_velocity_m_s = theory_velocity;
     pthread_mutex_unlock(&g_shared_state.mutex);
 }
 
@@ -670,10 +677,10 @@ void start_logging(void) {
     
     g_log_file = fopen(g_log_filename, "w");
     if (g_log_file != NULL) {
-        fprintf(g_log_file, "%-20s,%-12s,%-12s,%-12s,%-14s,%-14s,%-16s,%-14s,%-20s,%-16s,%-18s,%-22s\n",
+        fprintf(g_log_file, "%-20s,%-12s,%-12s,%-12s,%-14s,%-14s,%-16s,%-14s,%-20s,%-20s,%-16s,%-18s,%-22s\n",
                 "Time", "Current(A)", "Voltage(V)", "Pressure(kg)", "RopeLength(m)",
                 "EncoderValue", "EncoderAngle(deg)", "MotorSpeed(rpm)", 
-                "MotorLinearVel(m/s)", "MotorPosition(m)", 
+                "MotorLinearVel(m/s)", "MotorTheoryVel(m/s)", "MotorPosition(m)", 
                 "RopeVelocityRaw(m/s)", "RopeVelocityFiltered(m/s)");
         printf("[LOG] Started logging to: %s\n", g_log_filename);
         g_log_count = 0;
@@ -736,12 +743,14 @@ static void* data_collection_thread(void* arg) {
         
         /* 更新电机数据到共享缓冲区 - 无论是否使能都读取电机状态 */
         float motor_speed_rpm = 0.0f, motor_pos_m = 0.0f, motor_linear_vel = 0.0f;
+        float motor_theory_vel = 0.0f;
         if (g_motor.initialized) {
             update_motor_to_buffer();
             pthread_mutex_lock(&g_shared_state.mutex);
             motor_speed_rpm = g_shared_state.motor_speed_rpm;
             motor_pos_m = g_shared_state.motor_position_m;
             motor_linear_vel = g_shared_state.motor_linear_velocity_m_s;
+            motor_theory_vel = g_shared_state.motor_theory_linear_velocity_m_s;
             pthread_mutex_unlock(&g_shared_state.mutex);
         }
         
@@ -763,11 +772,11 @@ static void* data_collection_thread(void* arg) {
             snprintf(time_str, sizeof(time_str), "%02d:%02d:%02d.%06ld",
                      t->tm_hour, t->tm_min, t->tm_sec, (long)tv.tv_usec);
             
-            fprintf(g_log_file, "%-20s,%-12.3f,%-12.3f,%-12.3f,%-14.3f,%-14u,%-16.3f,%-14.3f,%-20.3f,%-16.3f,%-18.3f,%-22.3f\n",
+            fprintf(g_log_file, "%-20s,%-12.3f,%-12.3f,%-12.3f,%-14.3f,%-14u,%-16.3f,%-14.3f,%-20.3f,%-20.3f,%-16.3f,%-18.3f,%-22.3f\n",
                     time_str,
                     current_a, voltage_v, pressure_kg, rope_length_m,
                     encoder_value, encoder_angle, motor_speed_rpm,
-                    motor_linear_vel, motor_pos_m,
+                    motor_linear_vel, motor_theory_vel, motor_pos_m,
                     rope_vel_raw, rope_vel_filtered);
             
             g_log_count++;

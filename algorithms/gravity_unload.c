@@ -19,6 +19,7 @@ extern int set_clutch_current(float current_mA);
 extern int get_motor_actual_velocity(float *velocity);
 extern uint32_t get_timestamp_ms(void);
 extern void update_rope_velocity(float raw_velocity, float filtered_velocity);
+extern void update_motor_theory_velocity(float theory_velocity);
 
 /******************************************************************************
  * 内部函数声明
@@ -284,9 +285,10 @@ static void calculate_control_output(GravityUnloadController_t *ctrl,
     }
     
     /* 步骤2: 计算电机目标速度 */
-    /* 电机速度(rpm) = 滑轮转速(rpm) × 减速比 */
-    /*              = (V * 30 / πR1) × 3  (减速比3:1，电机转3圈滑轮转1圈) */
-    float target_motor_speed = (filtered->velocity_m_s / ctrl->pulley_r1_m) * (30.0f / 3.14159f) * 3.0f * (1.0f + ctrl->motor_speed_compensation);
+    /* 电机速度(rpm) = V * 30 / (π * R1) */
+    /* 不乘以减速比3，直接计算电机轴转速 */
+    /* 减速比已在机械结构中体现，软件无需额外处理 */
+    float target_motor_speed = (filtered->velocity_m_s / ctrl->pulley_r1_m) * (30.0f / 3.14159f) * (1.0f + ctrl->motor_speed_compensation);
     
     /* 使用PID控制器 */
     float pid_output = pid_update(&ctrl->pid, target_motor_speed, output->motor_velocity_actual);
@@ -332,10 +334,11 @@ AlgoError_t gravity_unload_control_cycle(GravityUnloadController_t *ctrl,
     /* 步骤1: 处理传感器数据 */
     process_sensor_data(ctrl, raw_data, filtered_data);
     
-    /* 步骤2: 获取电机实际速度 */
+    /* 步骤2: 获取电机实际速度并转换为滑轮转速 */
+    /* 电机转速(rpm) -> 滑轮转速(rpm) = 电机转速 / 减速比3 */
     float actual_velocity = 0.0f;
     get_motor_actual_velocity(&actual_velocity);
-    control_output->motor_velocity_actual = actual_velocity;
+    control_output->motor_velocity_actual = actual_velocity / 3.0f;  /* 除以减速比3 */
     
     /* 步骤3: 计算控制输出 */
     calculate_control_output(ctrl, filtered_data, control_output);
@@ -425,6 +428,13 @@ static void* gravity_unload_thread(void *arg) {
     
     /* 更新绳子速度到共享状态缓冲区 */
     update_rope_velocity(filtered_data.velocity_raw_m_s, filtered_data.velocity_m_s);
+    
+    /* 计算电机理论线速度并更新到共享状态缓冲区 */
+    /* 理论线速度 = PID控制器的目标值（setpoint）对应的线速度 */
+    /* 注意：PID控制器的目标值是电机转速(rpm)，需要转换为线速度(m/s) */
+    float target_motor_speed_rpm = (filtered_data.velocity_m_s / ctrl->pulley_r1_m) * (30.0f / 3.14159f) * (1.0f + ctrl->motor_speed_compensation);
+    float theory_linear_vel = -(target_motor_speed_rpm * 2.0f * 3.14159f * ctrl->pulley_r1_m) / 60.0f;
+    update_motor_theory_velocity(theory_linear_vel);
     
     /* 1Hz调试打印并输出到文件供上位机读取 */
         uint32_t current_time = get_timestamp_ms();
